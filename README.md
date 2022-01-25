@@ -23,3 +23,6 @@
     |-  download audios
         |-  <Your Audios>
     ```
+# Copyright
+* [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： <a href="https://www.flaticon.com/free-icons/headset" title="headset icons">Headset icons created by smalllikeart - Flaticon</a>
+
