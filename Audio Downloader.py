@@ -55,8 +55,7 @@ for link in links:
                 os.remove(new_path)
             ffmpeg.input(original_path).output(new_path, f="wav").run()
             os.remove(original_path)
-            print(yt.title+"."+audio_format,
-                  " has been downloaded successfully.")
+            print(yt.title+"."+audio_format," has been downloaded successfully.")
         except Exception as e:
             Error_handler("Error: "+str(e))
             Error_handler("original path: "+original_path)
