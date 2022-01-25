@@ -33,10 +33,13 @@ while True:
     break
 
 for link in links:
-    yt = YouTube(link, on_progress_callback=on_progress)
-
     if not os.path.isdir(folder):
         os.makedirs(folder)
+
+    try:
+        yt = YouTube(link, on_progress_callback=on_progress)
+    except Exception as e:
+        Error_handler("Error: "+str(e))
 
     original_path = folder+"/"+yt.title+".mp4"
     if os.path.isfile(original_path):
@@ -55,8 +58,7 @@ for link in links:
                 os.remove(new_path)
             ffmpeg.input(original_path).output(new_path, f="wav").run()
             os.remove(original_path)
-            print(yt.title+"."+audio_format," has been downloaded successfully.")
+            print(yt.title+"."+audio_format,
+                  " has been downloaded successfully.")
         except Exception as e:
             Error_handler("Error: "+str(e))
-            Error_handler("original path: "+original_path)
-            Error_handler("new path: "+new_path)
