@@ -1,8 +1,28 @@
 # URL for test: https://youtu.be/9MpO8lw_Rj4
+import string
+from tokenize import String
 from pytube import YouTube
 from pytube.cli import on_progress
 import ffmpeg
 import os
+import time
+
+from sqlalchemy import false, null, true
+
+folder = "./Audio Storage"
+
+
+def Error_handling(msg: string = 'No message!', refresh: bool = False):
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
+    err_path = folder+"/Err.txt"
+    mode = "a+"
+    if refresh:
+        mode = "w+"
+    file = open(err_path, mode)
+    file.write(time.asctime(time.localtime(time.time()))+":  "+msg+'\r\n')
+    file.close()
+
 
 links = input("The youtube URLs: ").split(" ")
 while True:
@@ -15,7 +35,6 @@ while True:
 for link in links:
     yt = YouTube(link, on_progress_callback=on_progress)
 
-    folder = "./download audios"
     if not os.path.isdir(folder):
         os.makedirs(folder)
 
@@ -26,7 +45,7 @@ for link in links:
     try:
         yt.streams.get_audio_only().download(output_path=folder)
     except Exception as e:
-        print("Error: ", e)
+        Error_handling("Error: "+str(e))
 
     if audio_format != 'mp4':
         try:
@@ -37,6 +56,6 @@ for link in links:
                          ".mp4").output(new_path, f="wav").run()
             os.remove(folder+"/"+yt.title+".mp4")
         except Exception as e:
-            print("Error: ", e)
-            print("original path: ", original_path)
-            print("new path: ", new_path)
+            Error_handling("Error: "+str(e))
+            Error_handling("original path: "+original_path)
+            Error_handling("new path: "+new_path)
