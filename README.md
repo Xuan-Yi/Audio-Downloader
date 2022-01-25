@@ -8,7 +8,7 @@
 
 # Tutorial
 * It's easy to use, since many functions of **pytube** and **ffmpeg** are sacrificed.
-    ![](readme_imgs\window.jpg)
+    ![](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)
 1. **Paste the youtube URLs** of the audio you'd like to download. Mind, you can paste multiple URLs with each splited by a space, as showm above.
 2. **Choose the audio format** you'd like to download as. Only
     * mp3
