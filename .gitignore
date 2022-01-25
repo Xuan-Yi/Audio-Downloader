@@ -1,0 +1,5 @@
+# files built
+__pycache__
+build
+dist
+Audio Downloader.spec
