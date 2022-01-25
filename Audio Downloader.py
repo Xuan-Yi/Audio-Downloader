@@ -9,13 +9,13 @@ import time
 
 from sqlalchemy import false, null, true
 
-folder = "./Audio Storage"
+folder = os.getcwd()+"/Audio Storage"
 
 
-def Error_handling(msg: string = 'No message!', refresh: bool = False):
+def Error_handler(msg: string = 'No message!', refresh: bool = False):
     if not os.path.isdir(folder):
         os.makedirs(folder)
-    err_path = folder+"/Err.txt"
+    err_path = folder+"/Err_Msg.txt"
     mode = "a+"
     if refresh:
         mode = "w+"
@@ -38,24 +38,26 @@ for link in links:
     if not os.path.isdir(folder):
         os.makedirs(folder)
 
-    original_path = folder+"/"+yt.title + ".mp4"
+    original_path = folder+"/"+yt.title+".mp4"
     if os.path.isfile(original_path):
         os.remove(original_path)
 
     try:
         yt.streams.get_audio_only().download(output_path=folder)
     except Exception as e:
-        Error_handling("Error: "+str(e))
+        Error_handler("Error: "+str(e))
 
     if audio_format != 'mp4':
         try:
             new_path = folder+"/"+yt.title+"."+audio_format
+
             if os.path.isfile(new_path):
                 os.remove(new_path)
-            ffmpeg.input(folder+"/"+yt.title +
-                         ".mp4").output(new_path, f="wav").run()
-            os.remove(folder+"/"+yt.title+".mp4")
+            ffmpeg.input(original_path).output(new_path, f="wav").run()
+            os.remove(original_path)
+            print(yt.title+"."+audio_format,
+                  " has been downloaded successfully.")
         except Exception as e:
-            Error_handling("Error: "+str(e))
-            Error_handling("original path: "+original_path)
-            Error_handling("new path: "+new_path)
+            Error_handler("Error: "+str(e))
+            Error_handler("original path: "+original_path)
+            Error_handler("new path: "+new_path)
