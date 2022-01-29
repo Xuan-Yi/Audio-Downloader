@@ -14,6 +14,7 @@
 * [ffmpeg-python](https://github.com/kkroening/ffmpeg-python.git): `pip install ffmpeg-python`
 
 # Tutorial
+## [Audio Downloader.exe]((https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v0.0.1))
 * It's easy to use, since many functions of **pytube** and **ffmpeg** are sacrificed.
     ![](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)
 1. **Paste the youtube URLs** of the audio you'd like to download. Mind, you can paste multiple URLs with each splited by a space, as showm above.
@@ -32,6 +33,11 @@
             |-  (Err_Msg.txt)
             |-  <Your Audios>
     ```
+## Hide ffmpeg
+1. Move ffmpeg.exe(included in release) to wherever you want, e.g. C:\ .
+2. The path of ffmpeg.exe would be `<path>\ffmpeg.exe` , then add `<path>` to PATH.
+3. Now you can access `Audio Downloader.exe` directly.
+
 # Copyright
 * [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： <a href="https://www.flaticon.com/free-icons/headset" title="headset icons">Headset icons created by smalllikeart - Flaticon</a>
 
