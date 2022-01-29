@@ -9,6 +9,10 @@
 * This tiny program use [pytube](https://github.com/pytube/pytube.git) to download audio. Then convert the audio format from mp4 to mp3, wav, m4a or mp4 with [ffmpeg](https://github.com/kkroening/ffmpeg-python.git).
 * This tool has not had a GUI yet.
 
+# Modules
+* [Pytube](https://github.com/pytube/pytube.git): `pip install pytube`
+* [ffmpeg-python](https://github.com/kkroening/ffmpeg-python.git): `pip install ffmpeg-python`
+
 # Tutorial
 * It's easy to use, since many functions of **pytube** and **ffmpeg** are sacrificed.
     ![](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)

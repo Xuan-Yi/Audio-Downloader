@@ -7,8 +7,6 @@ import ffmpeg
 import os
 import time
 
-from sqlalchemy import false, null, true
-
 folder = os.getcwd()+"/Audio Storage"
 
 
