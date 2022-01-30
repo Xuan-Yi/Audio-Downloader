@@ -11,7 +11,7 @@
 
 # Modules
 * [Pytube](https://github.com/pytube/pytube.git): `pip install pytube`
-* [ffmpeg-python](https://github.com/kkroening/ffmpeg-python.git): `pip install ffmpeg-python`
+* [Pydub](https://github.com/jiaaro/pydub.git): `pip install pydub`
 
 # Tutorial
 ## [Audio Downloader.exe]((https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v0.0.1))
@@ -33,10 +33,18 @@
             |-  (Err_Msg.txt)
             |-  <Your Audios>
     ```
-## Hide ffmpeg
-1. Move ffmpeg.exe(included in release) to wherever you want, e.g. C:\ .
-2. The path of ffmpeg.exe would be `<path>\ffmpeg.exe` , then add `<path>` to PATH.
-3. Now you can access `Audio Downloader.exe` directly.
+## Get ffmpeg
+* Mac (use [homebrew](https://brew.sh/))
+    ```
+    brew install ffmpeg
+    ```
+* Linux (using aptitude):
+    ```
+    apt-get install ffmpeg libavcodec-extra
+    ```
+* Windows 
+    1. Download and unzip [*youtbe-dl*](https://drive.google.com/file/d/1GLcJpqDi5DKNwHTfJU4EpfcLbmd6kK5K/view?usp=sharing), which is a folder including **ffmpeg.exe** and **youtube-dl.exe**. Actually, *youtube-dl.exe* is not necessary, but you can access youtube-dl in your consoles if you don't delete *youtbe-dl.exe*.
+    2. Then add path of folder *youtube-dl*, that is, `XX\youtube-dl` to PATH.
 
 # Copyright
 * [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： <a href="https://www.flaticon.com/free-icons/headset" title="headset icons">Headset icons created by smalllikeart - Flaticon</a>
