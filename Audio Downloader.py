@@ -1,18 +1,16 @@
 # URL for test: https://youtu.be/9MpO8lw_Rj4
 import os
 import re
+from pytube import YouTube
 from tkinter import *
-from tkinter import messagebox
 import tkinter.font as tkFont
-from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import askdirectory
 import tkinter.ttk as ttk
-from error_handler import ErrorHandler
 from downloader import AudioDownloader
+from components.board import Board
 
 folder = os.getcwd()
-err_handler=ErrorHandler(folder)
-downloader=AudioDownloader(err_handler)
+downloader=AudioDownloader()
 
 # GUI
 window=Tk()
@@ -23,29 +21,31 @@ title_fontstyle=tkFont.Font(family='Arial',size=16)
 utility_fontstyle=tkFont.Font(family='Arial',size=12)
 queue_fontstyle=tkFont.Font(family='Ubuntu Light',size=12)
 
-path=StringVar()
+path=StringVar(value=os.getcwd())
 URLs=StringVar()
 
-title=Label(window,text="Audio Downloader",font=title_fontstyle)
+title=Label(window,text="Audio Downloader",pady=20,font=title_fontstyle)
 title.pack(side=TOP)
 
 # URLs input
 URL_frame=Frame(window)
-URL_frame.pack(side=TOP,pady=40)
+URL_frame.pack(side=TOP,pady=20,padx=6)
 URL_label=Label(URL_frame,text="Youtube URL: ",font=utility_fontstyle)
 URL_entry=Entry(URL_frame,width=80,font=utility_fontstyle)
 def render_queue(e=None):
-    if "Errors occur. See ./Err_Msg.txt" in board.get("0.0",END):
-        board.delete('0.0',END)
-    new_url= re.sub(" ","", URL_entry.get())
-    valid=downloader.append_URL(new_url)
-    if valid:
-        yt=downloader.get_yt_objects()[-1]
-        idx=len(downloader.get_yt_objects())
-        board.insert('insert',"["+str(idx)+"]"+yt.title+"\n\n")
-        board.yview_pickplace('end')
-    else:
-        messagebox.showerror("Invalid Youtube URL","[Invalid Youtube URL]   "+URL_entry.get())
+    url= re.sub(" ","", URL_entry.get())
+    if url != "":
+        valid=downloader.append_URL(url)
+        if valid:
+            yt=YouTube(url)
+            yt_objs=downloader.get_yt_objects()
+            if [str(yt)for yt in yt_objs].count(str(yt))==1:
+                board.render_url_inf(yt)
+            else:
+                board.render_warning_msg("[Duplicate url]: This url has been added before.")
+        else:
+            # messagebox.showerror("Invalid Youtube URL","[Invalid Youtube URL]   "+URL_entry.get())
+            board.render_error_msg("[Unavailable url] "+URL_entry.get())
     URL_entry.delete(0,'end')
 URL_btn=Button(URL_frame,text='+',font=utility_fontstyle,command=render_queue)
 
@@ -53,9 +53,11 @@ URL_label.pack(side=LEFT)
 URL_entry.pack(side=LEFT)
 URL_btn.pack(side=LEFT)
 
-board=ScrolledText(window,wrap=WORD,width=100,height=12,bg='black',fg='white',font=queue_fontstyle)
+# board
+board = Board(window)
 board.pack()
 window.bind('<Return>',render_queue)
+downloader.set_board(board)
 
 # config frame
 def select_dir():
@@ -68,7 +70,7 @@ config_frame.pack(side=TOP)
 path_frame=Frame(config_frame)
 path_frame.pack(side=TOP)
 path_label=Label(path_frame,text="Destination: ",font=utility_fontstyle)
-path_entry=Entry(path_frame,textvariable=path,width=60,font=utility_fontstyle)
+path_entry=Entry(path_frame,textvariable=path,state='readonly',width=60,font=utility_fontstyle)
 path_btn=Button(path_frame,command=select_dir,text="Search",font=utility_fontstyle)
 path_entry.insert(0,os.getcwd())
 path_label.pack(side=LEFT)
@@ -100,21 +102,26 @@ normalize_label2.pack(side=LEFT)
 
 # START button
 def start_convert():
+    start_btn.config(state='disable',text="Converting...")
+    start_btn.update()
     dir_path=str(path_entry.get())
     dBFS=int(normalize_entry.get().lstrip('-'))
     if normalize_entry.get()[0]=='-':
         dBFS=dBFS*(-1)
     if not os.path.isdir(dir_path):
-        messagebox.showerror("Destination path not found","path "+dir_path+" doesn't exists.")
+        board.render_error_msg("Destination path: "+dir_path+" doesn't exists.")
+        start_btn.config(state='active',text="Convert")
+        start_btn.update()
         return False
     downloader.set_dir(path_entry.get())
     downloader.set_Format(format_combo.get())
     downloader.set_dBFS(dBFS)
     perfect=downloader.convert()
-    if perfect:
-        board.delete('0.0',END)
-    else:
-        board.insert('insert',"\n\n Errors occur. See ./Err_Msg.txt\n")
+    
+    if not perfect:
+        board.render_error_msg("Something wents wrong! Check error messages above.")
+    start_btn.config(state='active',text="Convert")
+    start_btn.update()
     return perfect
 start_frame=Frame(window,width=100,pady=40)
 start_frame.pack()
