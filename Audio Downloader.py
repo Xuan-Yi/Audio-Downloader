@@ -1,4 +1,3 @@
-# URL for test: https://youtu.be/9MpO8lw_Rj4
 import os
 import re
 from pytube import YouTube
@@ -6,7 +5,7 @@ from tkinter import *
 import tkinter.font as tkFont
 from tkinter.filedialog import askdirectory
 import tkinter.ttk as ttk
-from downloader import AudioDownloader
+from cores.downloader import AudioDownloader
 from components.board import Board
 
 folder = os.getcwd()
@@ -15,7 +14,7 @@ downloader=AudioDownloader()
 # GUI
 window=Tk()
 window.title('Audio Downloader')
-window.iconbitmap("./icon.ico")
+window.iconbitmap("./images/icon.ico")
 
 title_fontstyle=tkFont.Font(family='Arial',size=16)
 utility_fontstyle=tkFont.Font(family='Arial',size=12)

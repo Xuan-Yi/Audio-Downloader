@@ -4,8 +4,5 @@ build
 dist
 Audio Downloader.spec
 
-# created by Audio Downloader.exe
-Err_Msg.txt
-
 # release
 release
