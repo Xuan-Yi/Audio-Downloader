@@ -1,7 +1,11 @@
 # Audio-Downloader
 
 # Release
-* [Audio Downloader v1.0.1](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v1.0.1)
+> [Audio Downloader v1.0.1](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v1.0.1)
+* This release works in my Win10, but not sure for other systems.
+* Remember to **install ffmpeg**. See *Get ffmpeg* below.
+* Please **DO NOT** move *Audio Downloader_v1.0.1.exe* out of the folder *Audio Downloader_v1.0.1*. You can place the folder anywhere.
+* Instead, create a **shortcut(捷徑)**, then you can access *Audio Downloader_v1.0.1.exe* everywhere.
 
 # Introduction
 * This tool is **NOT FOR COMMERCIAL USAGE**, please be careful when use this kind of programs.
