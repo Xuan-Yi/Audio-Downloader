@@ -1,7 +1,7 @@
 # Audio-Downloader
 
 # Release
-* [Audio Downloader v1.0.0](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/1.0.0)
+* [Audio Downloader v1.0.0](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v1.0.1)
 
 # Introduction
 * This tool is **NOT FOR COMMERCIAL USAGE**, please be careful when use this kind of programs.
@@ -36,6 +36,7 @@ Since [Pydub](https://github.com/jiaaro/pydub.git) depends on **ffmpeg**, **ffpr
     ```
     pip install pytube
     ```
+    Pytube is powerful, but because of Youtube's fast technical change, issues occurs  frequently. (v_1.0.0 -> v_1.0.1, for example). It's recommended to  check [Issues of pytube](https://github.com/pytube/pytube/issues) when pytube breaks again. 
 * [Pydub](https://github.com/jiaaro/pydub.git)
     ```
     pip install pydub

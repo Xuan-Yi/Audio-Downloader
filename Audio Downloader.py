@@ -34,19 +34,17 @@ URL_entry=Entry(URL_frame,width=80,font=utility_fontstyle)
 def render_queue(e=None):
     url= re.sub(" ","", URL_entry.get())
     if url != "":
-        valid=downloader.append_URL(url)
-        if valid:
+        return_msg=downloader.append_URL(url)
+        if return_msg=='SUCCESS':
             yt=YouTube(url)
-            yt_objs=downloader.get_yt_objects()
-            if [str(yt)for yt in yt_objs].count(str(yt))==1:
-                board.render_url_inf(yt)
-            else:
+            board.render_url_inf(yt)
+        elif return_msg=='DUPLICATE_URL':
                 board.render_warning_msg("[Duplicate url]: This url has been added before.")
-        else:
+        elif return_msg=='URL_UNAVAILABLE':
             # messagebox.showerror("Invalid Youtube URL","[Invalid Youtube URL]   "+URL_entry.get())
             board.render_error_msg("[Unavailable url] "+URL_entry.get())
     URL_entry.delete(0,'end')
-URL_btn=Button(URL_frame,text='+',font=utility_fontstyle,command=render_queue)
+URL_btn=Button(URL_frame,text='+',state='active',font=utility_fontstyle,command=render_queue)
 
 URL_label.pack(side=LEFT)
 URL_entry.pack(side=LEFT)
@@ -79,7 +77,7 @@ path_btn.pack(side=LEFT)
 format_frame=Frame(config_frame)
 format_frame.pack(side=LEFT)
 format_label=Label(format_frame,text="Audio format: ",font=utility_fontstyle)
-format_combo=ttk.Combobox(format_frame,value=["wav","mp3","m4a","mp4"],state='readonly',width=6,font=utility_fontstyle)
+format_combo=ttk.Combobox(format_frame,value=["wav","mp3","mp4"],state='readonly',width=6,font=utility_fontstyle)
 format_combo.current(0)
 format_label.pack(side=LEFT)
 format_combo.pack(side=LEFT)
@@ -101,8 +99,10 @@ normalize_label2.pack(side=LEFT)
 
 # START button
 def start_convert():
-    start_btn.config(state='disable',text="Converting...")
-    start_btn.update()
+    start_btn.config(state='disabled',text="Converting...")
+    URL_entry.config(state='readonly')
+    URL_btn.config(state='disabled',text='X')
+    window.update()
     dir_path=str(path_entry.get())
     dBFS=int(normalize_entry.get().lstrip('-'))
     if normalize_entry.get()[0]=='-':
@@ -110,7 +110,9 @@ def start_convert():
     if not os.path.isdir(dir_path):
         board.render_error_msg("Destination path: "+dir_path+" doesn't exists.")
         start_btn.config(state='active',text="Convert")
-        start_btn.update()
+        URL_entry.config(state='normal',text='+')
+        URL_btn.config(state='active')
+        window.update()
         return False
     downloader.set_dir(path_entry.get())
     downloader.set_Format(format_combo.get())
@@ -120,11 +122,13 @@ def start_convert():
     if not perfect:
         board.render_error_msg("Something wents wrong! Check error messages above.")
     start_btn.config(state='active',text="Convert")
-    start_btn.update()
+    URL_entry.config(state='normal')
+    URL_btn.config(state='active',text='+')
+    window.update()
     return perfect
 start_frame=Frame(window,width=100,pady=40)
 start_frame.pack()
-start_btn=Button(start_frame,width=80,text='Convert',bg='white',command=start_convert,font=utility_fontstyle)
+start_btn=Button(start_frame,width=80,state='active',text='Convert',bg='white',command=start_convert,font=utility_fontstyle)
 start_btn.pack(side=LEFT)
 
 window.mainloop()

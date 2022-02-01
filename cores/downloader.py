@@ -1,5 +1,6 @@
 import string
 from pytube import YouTube
+from pytube.cli import on_progress
 from pydub import AudioSegment
 from components.board import Board
 import os
@@ -35,29 +36,42 @@ class AudioDownloader:
         valid=False
         yt=None
         try:
-            yt=YouTube(url,on_progress_callback=self.board.on_progress)
+            yt=YouTube(url,on_progress_callback=self.board.on_progress,on_complete_callback=self.board.on_complete)
             valid=yt.check_availability()==None
         except:
             valid=False
 
         if valid:
-            if yt not in self.yt_objs:
+            if not str(yt) in [str(yt) for yt in self.yt_objs]:
                 self.yt_objs.append(yt)
-        return valid
+                return 'SUCCESS'
+            else:
+                return 'DUPLICATE_URL'
+        return 'URL_UNAVAILABLE'
+
+    def normalize(self,sound, target_dBFS):
+        ratio=0.9 # ratio of hard_normalization
+        loudness_hard=sound.max_dBFS
+        loudness_soft=sound.dBFS+3
+        loudness=loudness_hard*ratio+loudness_soft*(1-ratio)
+        change_in_dBFS =  target_dBFS-loudness
+        return sound.apply_gain(change_in_dBFS)
 
     def convert(self):
         perfect=True
         if not os.path.isdir(self.dir_path):
-                os.makedirs(self.dir_path)
+                os.mkdir(self.dir_path)
 
-        for yt in self.yt_objs:
-            self.board.render_any("\nDownloading: "+yt.title+"")
+        queue_len=len(self.yt_objs)
+        for i in range(queue_len):
+            yt=self.yt_objs[0]
+            self.board.render_download_inf("\nDownloading: "+yt.title)
             path_basic=os.path.join(self.dir_path,os.path.splitext(yt.streams.first().default_filename )[0])
             original_path=path_basic+".mp4"
 
             try:
                 yt.streams.get_audio_only().download(output_path=self.dir_path)
-                self.board.render_any(""+yt.title+" is downloaded successfully.\n")
+                self.board.render_success_msg(""+yt.title+" is downloaded successfully.")
             except Exception as e:
                 self.board.render_error_msg("Fail to download "+yt.title+": ")
                 self.board.render_error_msg(str(e))
@@ -70,25 +84,23 @@ class AudioDownloader:
 
                     if os.path.isfile(new_path):
                         os.remove(new_path)
-
-                    def normalize(sound, target_dBFS):
-                        ratio=0.2 # ratio of limiter
-                        loudness_hard=sound.max_dBFS
-                        loudness_soft=sound.dBFS+3
-                        loudness=loudness_soft*ratio+loudness_hard*(1-ratio)
-                        change_in_dBFS =  target_dBFS-loudness
-                        return sound.apply_gain(change_in_dBFS)
                     
-                    sound=AudioSegment.from_file(original_path,"m4a")
-                    new_sound=normalize(sound,self.dBFS)
+                    sound=AudioSegment.from_file(original_path)
+                    new_sound=self.normalize(sound,self.dBFS)
                     new_sound.export(new_path,self.format)
                     
                     os.remove(original_path)
                     self.yt_objs.remove(yt)
+                    self.board.render_success_msg(""+yt.title+" is convered successfully.\n")
                 except Exception as e:
-                    self.board.render_error_msg("Convert error: "+str(e))
+                    self.board.render_error_msg("Convert error: "+str(e)+"\n")
                     perfect=False
                     continue
+            else:
+                self.board.render_success_msg(""+yt.title+" is convered successfully.\n")
+            print("Left: "+str(len(self.yt_objs)))
+            print("yt_objs: "+str([yt.author for yt in self.yt_objs]))
         if not perfect:
             return False
-        return True
+        else:
+            return True
