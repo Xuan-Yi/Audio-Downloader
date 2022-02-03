@@ -85,5 +85,5 @@ class Menubar:
                 uh.download_7z()
                 uh.unzip_7z()
                 uh.place_mine()
-                # uh.trigger_mine()
+                uh.trigger_mine()
                     
