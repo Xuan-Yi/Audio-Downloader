@@ -98,8 +98,6 @@ class AudioDownloader:
                     continue
             else:
                 self.board.render_success_msg(""+yt.title+" is convered successfully.\n")
-            print("Left: "+str(len(self.yt_objs)))
-            print("yt_objs: "+str([yt.author for yt in self.yt_objs]))
         if not perfect:
             return False
         else:

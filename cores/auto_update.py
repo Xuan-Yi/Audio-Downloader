@@ -1,6 +1,6 @@
-from binascii import b2a_hex
 import os
 import shutil
+from sys import exit
 import string
 import urllib
 import py7zr
@@ -15,35 +15,35 @@ class update_handler:
         self.release_url = release_url
         with open('version.txt', 'r') as f:
             self.current_version = f.read()
-        print(self.current_version)
 
     def download_7z(self):
-        print('downloading 7zip...')
         self.zip_name = str(self.release_url).split(
             '/')[-1].replace("Audio.Downloader", "Audio Downloader")
         self.zip_path = os.path.join(os.getcwd(), self.zip_name)
-        print("7zip path: ", self.zip_path)
+        # delete existing 7zip
+        if os.path.isfile(self.zip_path):
+            os.remove(self.zip_path)
+        # download 7zip
         urllib.request.urlretrieve(self.release_url, self.zip_path)
-        print("zip downloaded")
 
     def unzip_7z(self):
-        print("unzipping...")
         self.folder_name = os.path.splitext(self.zip_name)[0]
         self.folder_dir = os.path.abspath("..")
-        print("folder: ", self.folder_dir)
+        # delete existing diractory
+        if os.path.isdir(os.path.join(self.folder_dir, self.folder_name)):
+            shutil.rmtree(os.path.join(self.folder_dir, self.folder_name))
+        # unzip
         with py7zr.SevenZipFile(self.zip_path, mode='r') as z:
             z.extractall(path=self.folder_dir)
-        print("folder unzipped")
 
     def place_annihilator(self):
         # Place Annihilator.txt to new folder, then close program
-        print("generating bat")
         self.annihilator_path = os.path.join(
             self.folder_dir, self.folder_name, "Annihilator.bat")
-        print("bat: ", self.annihilator_path)
+        # delete existing bat file
+        if os.path.isfile(self.annihilator_path):
+            os.remove(self.annihilator_path)
         with open(self.annihilator_path, 'x') as bat:
-            bat.write(f'rd /s  "{os.path.abspath(os.getcwd())}" \n')
-            print(os.path.abspath(os.getcwd()))
-            print()
+            bat.write(f'rd /s /q "{os.path.abspath(os.getcwd())}" \n')
             bat.write('exit()')
-        quit()
+        exit()
