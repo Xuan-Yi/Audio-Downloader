@@ -1,6 +1,7 @@
 import os
 import requests
 import webbrowser
+import platform
 from tkinter import *
 from tkinter import messagebox
 import tkinter.font as tkFont
@@ -13,6 +14,8 @@ class Menubar:
         self.fontStyle = tkFont.Font(family='Arial', size=12)  # font style
         self.check_version()  # read current and latest versions
         self.menubar = Menu(self.window, font=self.fontStyle, tearoff=False)
+        self.system = platform.system()
+        self.update_handler = update_handler(self.release_url)
         # Information
         self.information_menu = Menu(self.menubar, tearoff=False)
         self.information_menu.add_command(
@@ -73,17 +76,18 @@ class Menubar:
                             f'Audio-Downloader_{self.current_version}')
 
     def check_update_callback(self):
-        if self.is_latest_version():
-            messagebox.showinfo(
-                'Check update', f'Audio-Downloader_{self.current_version} is the latest version.')
+        if self.system != 'Windows':
+            messagebox.showinfo('Auto update unavailable',
+                                'Auto update only support Windows system now.')
         else:
-            downlad = messagebox.askyesno(
-                'Check update', f'New version released:\nAudio-Downloader_{self.latest_version}\nWould you like to auto update Audio Downloader?')
-            if downlad:
-                # auto update
-                uh=update_handler(self.release_url)
-                uh.download_7z()
-                uh.unzip_7z()
-                uh.place_mine()
-                uh.trigger_mine()
-                    
+            if self.is_latest_version():
+                messagebox.showinfo(
+                    'Check update', f'Audio-Downloader_{self.current_version} is the latest version.')
+            else:
+                downlad = messagebox.askyesno(
+                    'Check update', f'New version released:\nAudio-Downloader_{self.latest_version}\nWould you like to auto update Audio Downloader?')
+                if downlad:
+                    # auto update
+                    self.update_handler.download_7z()
+                    self.update_handler.unzip_7z()
+                    self.update_handler.place_annihilator()
