@@ -1,7 +1,7 @@
 # Audio-Downloader
 
 # Release
-> [Audio Downloader v1.1.0](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v1.1.0)
+> [Audio Downloader_v1.1.0](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v1.1.0)
 * This release works in my Win10, but not sure for other systems.
 * Remember to **install ffmpeg**. See *Get ffmpeg* below.
 * Please **DO NOT** move *Audio Downloader_v1.0.1.exe* out of the folder *Audio Downloader_v1.0.1*. You can place the folder anywhere.
@@ -27,7 +27,8 @@ Since [Pydub](https://github.com/jiaaro/pydub.git) depends on **ffmpeg**, **ffpr
     ```
     apt-get install ffmpeg
     ```
-* Windows 
+* Windows
+    > If you don't want to add these files to PATH,git  place them under the same layer where *Audio Downloader_vx.x.x* is.
     1. Download and unzip folder [*youtbe-dl*](https://drive.google.com/file/d/1GLcJpqDi5DKNwHTfJU4EpfcLbmd6kK5K/view?usp=sharing), which includes 4 .exe files. 
         > Actually, *youtube-dl.exe* is not necessary, but you can access youtube-dl in your consoles if you don't delete *youtbe-dl.exe*.
     2. Add path of the folder *youtube-dl*, that is, `XX\youtube-dl` to [PATH](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/).
@@ -45,4 +46,11 @@ Since [Pydub](https://github.com/jiaaro/pydub.git) depends on **ffmpeg**, **ffpr
     ```
     pip install pydub
     ```
-
+* [requests](https://github.com/psf/requests.git)
+    ```
+    python -m pip install requests
+    ```
+* [py7zr](https://github.com/miurahr/py7zr.git)
+    ```
+    pip install py7zr
+    ```
