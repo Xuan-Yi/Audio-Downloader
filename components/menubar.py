@@ -80,6 +80,7 @@ class Menubar:
             messagebox.showinfo('Auto update unavailable',
                                 'Auto update only support Windows system now.')
         else:
+            self.check_version()
             if self.is_latest_version():
                 messagebox.showinfo(
                     'Check update', f'Audio-Downloader_{self.current_version} is the latest version.')
