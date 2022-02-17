@@ -1,6 +1,5 @@
 import os
 import shutil
-from sys import exit
 import string
 import urllib
 import py7zr
@@ -35,15 +34,3 @@ class update_handler:
         # unzip
         with py7zr.SevenZipFile(self.zip_path, mode='r') as z:
             z.extractall(path=self.folder_dir)
-
-    def place_annihilator(self):
-        # Place Annihilator.txt to new folder, then close program
-        self.annihilator_path = os.path.join(
-            self.folder_dir, self.folder_name, "Annihilator.bat")
-        # delete existing bat file
-        if os.path.isfile(self.annihilator_path):
-            os.remove(self.annihilator_path)
-        with open(self.annihilator_path, 'x') as bat:
-            bat.write(f'rd /s /q "{os.path.abspath(os.getcwd())}" \n')
-            bat.write('exit()')
-        exit()

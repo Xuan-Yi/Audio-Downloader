@@ -50,7 +50,7 @@ class AudioDownloader:
         return 'URL_UNAVAILABLE'
 
     def normalize(self,sound, target_dBFS):
-        ratio=0.9 # ratio of hard_normalization
+        ratio=1.0 # ratio of hard_normalization
         loudness_hard=sound.max_dBFS
         loudness_soft=sound.dBFS+3
         loudness=loudness_hard*ratio+loudness_soft*(1-ratio)
