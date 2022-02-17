@@ -64,11 +64,11 @@ class Menubar:
             '.')  # convert string to array
         latest_version = str(self.latest_version).split(
             '.')  # convert string to array
-        if int(latest_version[0].strip('v')) < int(current_version[0].strip('v')):
+        if int(latest_version[0].strip('v')) <= int(current_version[0].strip('v')):
             return True
-        if int(latest_version[1]) < int(current_version[1]):
+        if int(latest_version[1]) <= int(current_version[1]):
             return True
-        if int(latest_version[2]) < int(current_version[2]):
+        if int(latest_version[2]) <= int(current_version[2]):
             return True
         return False
 
