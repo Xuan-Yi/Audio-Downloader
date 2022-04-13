@@ -18,7 +18,7 @@ class AudioDownloader:
         else:
             self.board.render_error_msg("Format not supported: ",audio_format)
 
-    def set_dBFS(self,dBFS='-6'):
+    def set_dBFS(self,dBFS='0'):
         self.dBFS=dBFS
 
     def set_dir(self,dir_path):

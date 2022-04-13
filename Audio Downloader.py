@@ -1,6 +1,9 @@
 import os
 import re
+import string
 from sys import exit
+import tkinter
+from tokenize import String
 from pytube import YouTube
 from tkinter import *
 from tkinter import messagebox
@@ -79,7 +82,9 @@ else:
 
     def select_dir():
         path_ = askdirectory()
-        path.set(path_)
+        print('path: ', path_, '\ttype: ', type(path_))
+        if path_ != '':
+            path.set(path_)
 
     config_frame = Frame(window, pady=4)
     config_frame.pack(side=TOP)
@@ -110,46 +115,74 @@ else:
     normalize_frame = Frame(config_frame)
     normalize_frame.pack(side=RIGHT)
 
-    def normalize_validate(p):
-        if str.isdigit(p.lstrip('-')) or (p == "-"):
+    def normalize_validate(dBFS: str):
+        for c in dBFS:
+            if c not in ['-', '.', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                normalize_entry.delete(0, 'end')
+                normalize_entry.insert(0, '-0.1')
+                messagebox.showwarning('Invalid dBFS','dBFS should be a number ≤0')
+                return False
+        if dBFS == '0':
             return True
-        return False
+        # quit invalid raw dBFS
+        if len(re.findall('\.', dBFS)) > 1 or len(re.findall('-', dBFS)) > 1 or dBFS[0] != '-':
+            normalize_entry.delete(0, 'end')
+            normalize_entry.insert(0, '-0.1')
+            messagebox.showwarning('Invalid dBFS','dBFS should be a number ≤0')
+            return False
+        # define raw dBFS to acceptable format
+        if ' ' in dBFS:
+            dBFS = dBFS.split()
+            dBFS.join()
+        while dBFS[1] == '0' and dBFS[2] != '.':
+            dBFS = '-'+dBFS[2:]
+        if dBFS[1] == '.':
+            dBFS = '-0'+dBFS[1:]
+        normalize_entry.delete(0, 'end')
+        normalize_entry.insert(0, dBFS)
+        return True
 
-    valid_cmd = (config_frame.register(normalize_validate), "%S")
+    valid_cmd = (config_frame.register(normalize_validate), "%P")
     normalize_label1 = Label(
         normalize_frame, text="Normalize to ", font=utility_fontstyle)
-    normalize_entry = Entry(normalize_frame, validate='key',
+    normalize_entry = Entry(normalize_frame, validate='focusout',
                             width=6, validatecommand=valid_cmd, font=utility_fontstyle,)
     normalize_label2 = Label(
         normalize_frame, text=" dBFS", font=utility_fontstyle)
-    normalize_entry.insert(0, "-6")
+    normalize_entry.insert(0, '-0.1')
     normalize_label1.pack(side=LEFT)
     normalize_entry.pack(side=LEFT)
     normalize_label2.pack(side=LEFT)
 
     # START button
+    def convert_dBFS_to_double(dBFS_str: str):
+        if dBFS_str == '0':
+            return 0
+        dBFS_ = dBFS_str.split(sep='.')
+        dBFS = (-1)*(int(dBFS_[0])+int(dBFS_[1])*pow(10, ((-1)*len(dBFS_[1]))))
+        return dBFS
 
     def start_convert():
+        dir_path = str(path_entry.get())
+        dBFS = convert_dBFS_to_double(normalize_entry.get())
+        # check dBFS is in acceptable form
+        if normalize_validate(normalize_entry.get()) == False:
+            return False
+        # check the target directory exists
+        if not os.path.isdir(dir_path):
+            board.render_error_msg("[Invalid destination path]: "+dir_path)
+            window.update()
+            return False
+
         start_btn.config(state='disabled', text="Converting...")
         URL_entry.config(state='readonly')
         URL_btn.config(state='disabled', text='X')
         window.update()
-        dir_path = str(path_entry.get())
-        dBFS = int(normalize_entry.get().lstrip('-'))
-        if normalize_entry.get()[0] == '-':
-            dBFS = dBFS*(-1)
-        if not os.path.isdir(dir_path):
-            board.render_error_msg("[Invalid destination path]: "+dir_path)
-            start_btn.config(state='active', text="Convert")
-            URL_entry.config(state='normal', text='+')
-            URL_btn.config(state='active')
-            window.update()
-            return False
         downloader.set_dir(path_entry.get())
         downloader.set_Format(format_combo.get())
         downloader.set_dBFS(dBFS)
-        perfect = downloader.convert()
 
+        perfect = downloader.convert()
         if not perfect:
             board.render_error_msg(
                 "Something wents wrong! Check error messages above.")
