@@ -1,3 +1,4 @@
+from multiprocessing import queues
 import os
 import re
 import string
@@ -59,10 +60,9 @@ else:
                 yt = YouTube(url)
                 board.render_url_inf(yt)
             elif return_msg == 'DUPLICATE_URL':
-                board.render_warning_msg(
-                    "[Duplicate url]: This url has been added before.")
+                messagebox.showwarning('Duplicate url','This url has been added.')
             elif return_msg == 'URL_UNAVAILABLE':
-                board.render_error_msg("[Unavailable url] "+URL_entry.get())
+                messagebox.showerror('Unavailable url',f'{URL_entry.get()} \nis not a valid Youtube url or is unavailable.')
         URL_entry.delete(0, 'end')
 
     URL_btn = Button(URL_frame, text='+', state='active',
@@ -120,7 +120,8 @@ else:
             if c not in ['-', '.', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
                 normalize_entry.delete(0, 'end')
                 normalize_entry.insert(0, '-0.1')
-                messagebox.showwarning('Invalid dBFS','dBFS should be a number ≤0')
+                messagebox.showwarning(
+                    'Invalid dBFS', 'dBFS should be a number ≤0')
                 return False
         if dBFS == '0':
             return True
@@ -128,7 +129,8 @@ else:
         if len(re.findall('\.', dBFS)) > 1 or len(re.findall('-', dBFS)) > 1 or dBFS[0] != '-':
             normalize_entry.delete(0, 'end')
             normalize_entry.insert(0, '-0.1')
-            messagebox.showwarning('Invalid dBFS','dBFS should be a number ≤0')
+            messagebox.showwarning(
+                'Invalid dBFS', 'dBFS should be a number ≤0')
             return False
         # define raw dBFS to acceptable format
         if ' ' in dBFS:
