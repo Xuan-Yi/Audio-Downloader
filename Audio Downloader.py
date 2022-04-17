@@ -1,4 +1,4 @@
-from multiprocessing import queues
+from multiprocessing import connection, queues
 import os
 import re
 import string
@@ -16,10 +16,11 @@ from components.board import Board
 from components.menubar import Menubar
 
 # Check connection
-connection = os.system('ping www.github.com')
+connection = os.system('ping www.google.com')
 
 if connection != 0:
     window = Tk()
+    window.resizable(False, False)
     window.withdraw()
     messagebox.showerror("No internet connection",
                          "Cannot open Audio Downloader.\nPleace check your connection.")
@@ -29,6 +30,7 @@ else:
 
     # GUI
     window = Tk()
+    window.resizable(False, False)
     window.title('Audio Downloader')
     window.iconbitmap("./images/icon.ico")
 
@@ -60,9 +62,11 @@ else:
                 yt = YouTube(url)
                 board.render_url_inf(yt)
             elif return_msg == 'DUPLICATE_URL':
-                messagebox.showwarning('Duplicate url','This url has been added.')
+                messagebox.showwarning(
+                    'Duplicate url', 'This url has been added.')
             elif return_msg == 'URL_UNAVAILABLE':
-                messagebox.showerror('Unavailable url',f'{URL_entry.get()} \nis not a valid Youtube url or is unavailable.')
+                messagebox.showerror(
+                    'Unavailable url', f'{URL_entry.get()} \nis not a valid Youtube url or is unavailable.')
         URL_entry.delete(0, 'end')
 
     URL_btn = Button(URL_frame, text='+', state='active',
@@ -140,6 +144,8 @@ else:
             dBFS = '-'+dBFS[2:]
         if dBFS[1] == '.':
             dBFS = '-0'+dBFS[1:]
+        if len(re.findall('\.', dBFS)) == 0:
+            dBFS = dBFS+'.0'
         normalize_entry.delete(0, 'end')
         normalize_entry.insert(0, dBFS)
         return True
@@ -161,24 +167,29 @@ else:
         if dBFS_str == '0':
             return 0
         dBFS_ = dBFS_str.split(sep='.')
-        dBFS = (-1)*(int(dBFS_[0])+int(dBFS_[1])*pow(10, ((-1)*len(dBFS_[1]))))
+        print('dBFS array: ', int(dBFS_[0]), int(dBFS_[1]))
+        dBFS = int(dBFS_[0])-int(dBFS_[1])*pow(10, ((-1)*len(dBFS_[1])))
         return dBFS
 
     def start_convert():
         dir_path = str(path_entry.get())
-        dBFS = convert_dBFS_to_double(normalize_entry.get())
         # check dBFS is in acceptable form
         if normalize_validate(normalize_entry.get()) == False:
             return False
+        dBFS = convert_dBFS_to_double(normalize_entry.get())
         # check the target directory exists
         if not os.path.isdir(dir_path):
             board.render_error_msg("[Invalid destination path]: "+dir_path)
             window.update()
             return False
 
-        start_btn.config(state='disabled', text="Converting...")
         URL_entry.config(state='readonly')
         URL_btn.config(state='disabled', text='X')
+        format_combo.config(state='readonly')
+        normalize_entry.config(state='readonly')
+        path_entry.config(state='readonly')
+        path_btn.config(state='disable')
+        start_btn.config(state='disabled', text="Converting...")
         window.update()
         downloader.set_dir(path_entry.get())
         downloader.set_Format(format_combo.get())
@@ -188,9 +199,13 @@ else:
         if not perfect:
             board.render_error_msg(
                 "Something wents wrong! Check error messages above.")
-        start_btn.config(state='active', text="Convert")
         URL_entry.config(state='normal')
         URL_btn.config(state='active', text='+')
+        format_combo.config(state='normal')
+        normalize_entry.config(state='readonly')
+        path_entry.config(state='normal')
+        path_btn.config(state='normal')
+        start_btn.config(state='active', text="Convert")
         window.update()
         return perfect
 
