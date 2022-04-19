@@ -3,24 +3,58 @@ from pytube import YouTube
 from pytube.cli import on_progress
 from pydub import AudioSegment
 from components.board import Board
+from tkinter import messagebox
 import os
+
+queue_txt_path = os.path.abspath(os.path.join(os.getcwd(), 'queue.txt'))
+format_map = {'m4a': 'mp4', 'mp3': 'mp3', 'wav': 'wav', 'flac': 'flac'}
+
+
+def internet_connected():
+    connection = os.system('ping www.google.com')
+    if connection != 0:
+        return False
+    return True
 
 
 class AudioDownloader:
     def __init__(self):
-        self.yt_objs = []
+        # self.yt_objs = []
+        self.yt_queue = []  # {Youtube: (yt), url: (URL)}
         self.dir_path = os.getcwd()
         self.format = "wav"
-        self.dBFS = -6
-        
+        self.dBFS = -0.1
+        self.initialized = False
+
+    def init_yt_queue(self):
+        try:
+            if os.path.isfile(queue_txt_path):
+                yt_urls = []
+                with open(queue_txt_path, 'r') as f:
+                    s = f.read()
+                    yt_urls = s.split('$')
+                    yt_urls = yt_urls[:-1]
+                if yt_urls != []:
+                    for i in range(len(yt_urls)):
+                        yt_url = yt_urls[i]
+                        yt_obj = YouTube(yt_url, on_progress_callback=self.board.on_progress,
+                                         on_complete_callback=self.board.on_complete)
+                        self.yt_queue.append({"yt": yt_obj, "url": yt_url})
+                        self.board.render_url_inf(yt_obj)
+            else:
+                f = open(queue_txt_path, 'a+')
+                f.close()
+            self.initialized = True
+        except:
+            if not internet_connected():
+                messagebox.showerror('No internet connection!',
+                                     'Please check your internet connection.')
+            self.initialized = False
+
     def set_Format(self, audio_format='m4a'):
-        if audio_format in ["mp3", "wav", "m4a", "mp4"]:
-            self.format = audio_format
-        else:
-            self.board.render_error_msg("Format not supported: ", audio_format)
+        self.format = audio_format
 
     def set_dBFS(self, dBFS=0):
-        print('dBFS: ',dBFS)
         self.dBFS = dBFS
 
     def set_dir(self, dir_path):
@@ -30,44 +64,31 @@ class AudioDownloader:
     def set_board(self, board: Board):
         self.board = board
 
-    def get_yt_objects(self):
-        return self.yt_objs
-
-    def refresh_yt_objs(self):
-        queue_txt_path=os.path.abspath(os.path.join(os.getcwd(),'queue.txt'))
-        if os.path.isfile(queue_txt_path):
-            yt_urls = []
-            with open('./queue.txt', 'r') as f:
-                s = f.read()
-                yt_urls = s.split('$')
-            yt_urls=yt_urls[:-1]
-            print('yt_urls: ',yt_urls)
-            if yt_urls != []:
-                self.yt_objs = []
-                for i in range(len(yt_urls)):
-                    self.yt_objs.append(YouTube(
-                        yt_urls[i], on_progress_callback=self.board.on_progress, on_complete_callback=self.board.on_complete))
-
     def append_URL(self, url: string):
-        self.refresh_yt_objs()
         # Check if URL is valid
         valid = False
-        yt = None
+        yt_obj = None
         try:
-            yt = YouTube(url, on_progress_callback=self.board.on_progress,
-                         on_complete_callback=self.board.on_complete)
-            valid = yt.check_availability() == None
-        except:
-            valid = False
+            yt_obj = YouTube(url, on_progress_callback=self.board.on_progress,
+                             on_complete_callback=self.board.on_complete)
+            valid = yt_obj.check_availability() == None
+            if not self.initialized:
+                self.init_yt_queue()
 
-        if valid:
-            if not str(yt) in [str(yt) for yt in self.yt_objs]:
-                queue_txt_path=os.path.abspath(os.path.join(os.getcwd(),'queue.txt'))
-                with open(queue_txt_path, 'a') as queue_file:
-                    queue_file.write(f'{url}$')  # recognize \n\t\n\t
-                return 'SUCCESS'
-            else:
-                return 'DUPLICATE_URL'
+            if valid:
+                if not str(yt_obj) in [str(yt) for yt in [self.yt_queue[z]['yt'] for z in range(len(self.yt_queue))]]:
+                    with open(queue_txt_path, 'a') as queue_file:
+                        queue_file.write(f'{url}$')
+                    self.yt_queue.append({'yt': yt_obj, 'url': url})
+                    self.board.render_url_inf(yt_obj)
+                    return 'SUCCESS'
+                else:
+                    return 'DUPLICATE_URL'
+        except:
+            if not internet_connected():
+                messagebox.showerror('No internet connection!',
+                                     'Please check your internet connection.')
+                return 'NO_INTERNET_CONNECTION'
         return 'URL_UNAVAILABLE'
 
     def normalize(self, sound, target_dBFS):
@@ -79,23 +100,21 @@ class AudioDownloader:
         return sound.apply_gain(change_in_dBFS)
 
     def convert(self):
-        self.refresh_yt_objs()
+        if not internet_connected():
+            return False
+        else:
+            if not self.initialized:
+                self.init_yt_queue()
         perfect = True
         if not os.path.isdir(self.dir_path):
             os.mkdir(self.dir_path)
 
-        fail_list=[]
-        queue_list=[]
-        with open('./queue.txt','r') as f:
-            s=f.read()
-            queue_list=s.split('$')
-            queue_list=queue_list[:-1]
-        print('queue_list: ',queue_list)
-        print('yt_objs: ',type(self.yt_objs[0]))
+        fail_list = []
 
-        for i in range(len(self.yt_objs)):
-            yt = self.yt_objs[0]
-            print("yt: ",yt)
+        while len(self.yt_queue) != 0:
+            yt_obj = self.yt_queue[0]
+            yt = yt_obj['yt']
+            url = yt_obj['url']
             self.board.render_download_inf("\nDownloading: "+yt.title)
             path_basic = os.path.join(self.dir_path, os.path.splitext(
                 yt.streams.first().default_filename)[0])
@@ -109,33 +128,33 @@ class AudioDownloader:
                 self.board.render_error_msg("Fail to download "+yt.title+": ")
                 self.board.render_error_msg(str(e))
                 perfect = False
-                fail_list.append(queue_list[i])
+                fail_list.append(url)
+                self.yt_queue.remove(yt_obj)  # remove converted failed audio
                 continue
 
-            if self.format != 'mp4':
-                try:
-                    new_path = path_basic+"."+self.format
+            try:
+                new_path = path_basic+"."+self.format
 
-                    if os.path.isfile(new_path):
-                        os.remove(new_path)
+                if os.path.isfile(new_path):
+                    os.remove(new_path)
 
-                    sound = AudioSegment.from_file(original_path)
-                    new_sound = self.normalize(sound, self.dBFS)
-                    new_sound.export(new_path, self.format)
+                sound = AudioSegment.from_file(original_path)
+                new_sound = self.normalize(sound, self.dBFS)
+                new_sound.export(new_path, format_map[self.format])
 
-                    os.remove(original_path)
-                    self.yt_objs.remove(yt)
-                    self.board.render_success_msg(
-                        ""+yt.title+" is convered successfully.\n")
-                except Exception as e:
-                    self.board.render_error_msg("Convert error: "+str(e)+"\n")
-                    perfect = False
-                    continue
-            else:
+                os.remove(original_path)
                 self.board.render_success_msg(
                     ""+yt.title+" is convered successfully.\n")
+            except Exception as e:
+                self.board.render_error_msg("Convert error: "+str(e)+"\n")
+                perfect = False
+                fail_list.append(url)
+                # remove converted failed audio
+                self.yt_queue.remove(yt_obj)
+                continue
+            self.yt_queue.remove(yt_obj)  # remove converted audio
         os.remove('./queue.txt')
-        with open('./queue.txt','a') as f:
+        with open('./queue.txt', 'a') as f:
             for l in fail_list:
                 f.write(f'{l}$')
         if not perfect:

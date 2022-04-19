@@ -7,9 +7,6 @@ import py7zr
 
 class update_handler:
     def __init__(self, release_url: string):
-        # trigger
-        if os.path.isfile("Annihilator.bat"):
-            os.startfile("Annihilator.bat")
         # init
         self.release_url = release_url
         with open('version.txt', 'r') as f:

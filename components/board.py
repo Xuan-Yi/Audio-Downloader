@@ -20,17 +20,7 @@ class Board:
         self.board.tag_config("success_config", foreground='green')
         self.board.tag_config("progressbar_config", foreground='green')
         self.board.tag_config("download_inf_config", foreground='white')
-        # restore accidently brocken tasks
-        queue_txt_path=os.path.abspath(os.path.join(os.getcwd(),'queue.txt'))
-        if os.path.isfile(queue_txt_path):
-            unfinished_urls = []
-            with open('./queue.txt','r') as f:
-                s = f.read()
-                unfinished_urls = s.split('$')
-            for i in range(len(unfinished_urls)-1):
-                yt = YouTube(
-                    unfinished_urls[i], on_progress_callback=self.on_progress, on_complete_callback=self.on_complete)
-                self.render_url_inf(yt)
+        
 
     def set_fontStyle(self, fontStyle: tkFont.Font):
         self.fontStyle = fontStyle
@@ -49,11 +39,11 @@ class Board:
         self.board.yview_pickplace('end')
         self.board.config(state='disabled')
 
-    def render_warning_msg(self, warning: string):
+    '''def render_warning_msg(self, warning: string):
         self.board.config(state='normal')
         self.board.insert('end', warning+"\n", "warning_config")
         self.board.yview_pickplace('end')
-        self.board.config(state='disabled')
+        self.board.config(state='disabled')'''
 
     def render_success_msg(self, message: string):
         self.board.config(state='normal')
