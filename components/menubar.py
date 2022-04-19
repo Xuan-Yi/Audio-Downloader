@@ -85,13 +85,13 @@ class Menubar:
                 '.')  # convert string to array
             latest_version = str(self.latest_version).split(
                 '.')  # convert string to array
-            if int(latest_version[0].strip('v')) <= int(current_version[0].strip('v')):
-                return True
-            if int(latest_version[1]) <= int(current_version[1]):
-                return True
-            if int(latest_version[2]) <= int(current_version[2]):
-                return True
-            return False
+            if int(latest_version[0].strip('v')) > int(current_version[0].strip('v')):
+                return False
+            if int(latest_version[1]) > int(current_version[1]):
+                return False
+            if int(latest_version[2]) > int(current_version[2]):
+                return False
+            return True
         except:
             if not internet_connected():
                 messagebox.showerror('No internet connection!',
