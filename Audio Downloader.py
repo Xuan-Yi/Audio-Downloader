@@ -75,10 +75,9 @@ board = Board(window)
 board.pack()
 window.bind('<Return>', render_queue)
 downloader.set_board(board)
+Menubar.set_board(board)
 
 # config frame
-
-
 def select_dir():
     path_ = askdirectory()
     if path_ != '':
@@ -115,6 +114,8 @@ normalize_frame.pack(side=RIGHT)
 
 
 def normalize_validate(dBFS: str):
+    if dBFS in ['N', 'NaN', 'None']:    # do not normalize
+        return True
     for c in dBFS:
         if c not in ['-', '.', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
             normalize_entry.delete(0, 'end')
@@ -160,6 +161,8 @@ normalize_label2.pack(side=LEFT)
 
 
 def convert_dBFS_to_double(dBFS_str: str):
+    if dBFS_str in ['N', 'NaN', 'None']:    # do not normalize
+        return 'N'
     if dBFS_str == '0':
         return 0
     dBFS_ = dBFS_str.split(sep='.')

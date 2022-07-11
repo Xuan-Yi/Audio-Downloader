@@ -20,7 +20,6 @@ class Board:
         self.board.tag_config("success_config", foreground='green')
         self.board.tag_config("progressbar_config", foreground='green')
         self.board.tag_config("download_inf_config", foreground='white')
-        
 
     def set_fontStyle(self, fontStyle: tkFont.Font):
         self.fontStyle = fontStyle
@@ -39,11 +38,11 @@ class Board:
         self.board.yview_pickplace('end')
         self.board.config(state='disabled')
 
-    '''def render_warning_msg(self, warning: string):
+    def render_warning_msg(self, warning: string):
         self.board.config(state='normal')
         self.board.insert('end', warning+"\n", "warning_config")
         self.board.yview_pickplace('end')
-        self.board.config(state='disabled')'''
+        self.board.config(state='disabled')
 
     def render_success_msg(self, message: string):
         self.board.config(state='normal')

@@ -6,6 +6,7 @@ import py7zr
 from tkinter import *
 from tkinter import messagebox
 import tkinter.font as tkFont
+from components.board import Board
 from cores.auto_update import update_handler
 
 
@@ -36,6 +37,7 @@ class Menubar:
         self.function_menu = Menu(self.menubar, tearoff=False)
         self.function_menu.add_command(
             label="Clear url queue", command=self.clear_url_queue_callback)
+        self.function_menu.add_command(label="Read url queue file.")
         # ffmpeg
         self.ffmpeg_menu = Menu(self.menubar, tearoff=False)
         self.ffmpeg_menu.add_command(
@@ -57,6 +59,9 @@ class Menubar:
         self.menubar.add_cascade(label='Update', menu=self.update_menu)
 
         self.window.config(menu=self.menubar)
+
+    def set_board(self, board: Board):
+        self.board = board
 
     def check_version(self):
         try:
@@ -112,6 +117,7 @@ class Menubar:
             os.path.join(os.getcwd(), 'queue.txt'))
         if os.path.isfile(queue_txt_path):
             os.remove(queue_txt_path)
+        self.board.render_success_msg('url queue cleared.')
 
     def get_ffmpeg_callback(self):
         if internet_connected():
