@@ -1,15 +1,6 @@
-queue.txt
 # files built
-__pycache__
 build
 dist
-Audio Downloader.spec
+main.spec
 
-# release
-releases
-
-# ffmpeg
-ffmpeg.7z
-ffmpeg.exe
-ffplay.exe
-ffprobe.exe
+.gitignore
