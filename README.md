@@ -31,19 +31,51 @@ New version:
 - [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： <a href="https://www.flaticon.com/free-icons/headset" title="headset icons">Headset icons created by smalllikeart - Flaticon</a>
 
 # Modules
+* All modules are included in **./env.yaml**, you can simply create an environment by the command in Anaconda Prompt 
+  ```
+  conda env create -f <path of env.yaml>
+  ```
+  Again, remember to install ffmpeg on your computer.
+
+- [PyQt5](https://pypi.org/project/PyQt5/)
+  ```python
+  # conda
+  conda install -c anaconda pyqt
+  ```
 
 - [Pytube](https://github.com/pytube/pytube.git)
-  ```
+  ```python
+  # pip
   pip install pytube
   ```
 - [Pydub](https://github.com/jiaaro/pydub.git)
   ```python
-  # To install from the source with pip
-  python -m pip install git+https://github.com/pytube/pytube
-  # To install from PyPI
+  # pip
   pip install pydub
   ```
 - [requests](https://github.com/psf/requests.git)
+  ```python
+  # pip
+  pip install requests
   ```
-  python -m pip install requests
+- [pandas](https://pypi.org/project/pandas/)
+  ```python
+  # conda
+  conda install pandas
+  # pip
+  pip install pandas
   ```
+- [openpyxl](https://pypi.org/project/openpyxl/)
+  ```python
+  # conda
+  conda install -c anaconda openpyxl
+  # pip
+  pip install openpyxl
+  ```
+- [mutagen](https://pypi.org/project/mutagen/)
+  ```python
+  # pip
+  pip install mutagen
+  ```
+
+
