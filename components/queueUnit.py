@@ -12,6 +12,7 @@ from mutagen.id3 import ID3, APIC
 import urllib.request
 import os
 import numpy as np
+import pandas as pd
 
 formats = ['flac', 'mp3', 'm4a', 'wav']
 format_map = {'m4a': 'mp4', 'mp3': 'mp3', 'wav': 'wav', 'flac': 'flac'}
@@ -148,9 +149,9 @@ class QueueUnit(QWidget):
         self.delete_btn.setEnabled(a0)
 
     def setInfos(self, title: str, artist: str):
-        if title != "" and title != np.nan:
+        if title != "" and not pd.isnull(title):
             self.title.setText(title)
-        if artist != "" and artist != np.nan:
+        if artist != "" and not pd.isnull(artist):
             self.artist.setText(artist)
 
     def createThread(self, dir: str, format: str):

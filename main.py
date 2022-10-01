@@ -284,14 +284,14 @@ class ImportXlsxThread(QRunnable):
         url = info_dict['Youtube_obj'].thumbnail_url
         info_dict['Thumbnail_data'] = urllib.request.urlopen(url).read()
         # title text
-        if self.title == np.nan:
+        if pd.isnull(self.title):
             title = info_dict['Youtube_obj'].title
             info_dict['Title'] = "".join(
                 x for x in title if x not in "\\/:*?\"<>|\.")
         else:
             info_dict['Title'] = self.title
         # artist text
-        if self.artist == np.nan:
+        if pd.isnull(self.artist):
             artist = info_dict['Youtube_obj'].author
             info_dict['Artist'] = "".join(
                 x for x in artist if x not in "\\/:*?\"<>|\.")
