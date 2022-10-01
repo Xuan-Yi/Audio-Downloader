@@ -31,9 +31,9 @@ New version:
 - [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： <a href="https://www.flaticon.com/free-icons/headset" title="headset icons">Headset icons created by smalllikeart - Flaticon</a>
 
 # Modules
-* All modules are included in **./env.yaml**, you can simply create an environment by the command in Anaconda Prompt 
+* All modules are included in **./\<OS\>_env.yaml**, you can simply create an environment by the command in Anaconda Prompt 
   ```
-  conda env create -f <path of env.yaml>
+  conda env create -f <path of <OS>_env.yaml>
   ```
   Again, remember to install ffmpeg on your computer.
 
