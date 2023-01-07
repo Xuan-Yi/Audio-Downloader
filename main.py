@@ -1,6 +1,5 @@
 import sys
 import os
-from turtle import title
 import webbrowser
 import requests
 import numpy as np
@@ -17,7 +16,7 @@ from PyQt5.QtCore import *
 from containers.centralWidget import CentralWidget
 from components.queueUnit import QueueUnit
 
-current_version = 'v2.0.0'
+current_version = 'v2.0.1'
 
 
 class MainWindow(QMainWindow):
@@ -115,12 +114,12 @@ class MainWindow(QMainWindow):
             except:
                 dir = os.path.dirname(file)
                 sample_path = os.path.join(dir, 'Sample.xlsx')
-                sample_data = [['Love Story', 'Taylor Swift',
-                                'https://youtu.be/8xg3vE8Ie_E']]
+                sample_data = [['Never Gonna Give You Up', 'Rick Astley',
+                                'https://youtu.be/dQw4w9WgXcQ']]
                 df = pd.DataFrame(sample_data, columns=[
                                   'Title', 'Artist', 'Youtube URL'])
                 df.to_excel(sample_path, index=False)
-                QMessageBox.warning(None, 'Format problem occurs',
+                QMessageBox.warning(self, 'Format problem occurs',
                                     f'{file}\ncannot be loaded successfully.\n\nModel file is saved to\{sample_path}.')
 
     def __import_xlsx_on_complete(self, _props: dict):
@@ -177,11 +176,11 @@ class MainWindow(QMainWindow):
         try:
             webbrowser.open("https://github.com/Xuan-Yi/Audio-Downloader.git")
         except Exception as e:
-            QMessageBox.warning(None, 'No internet connection',
+            QMessageBox.warning(self, 'No internet connection',
                                 f'Please check your internet connection.\nError------\n{e}')
 
     def folder_location_callback(self):
-        QMessageBox.information(None, "Folder location", os.getcwd())
+        QMessageBox.information(self, "Folder location", os.getcwd())
 
     def version_info_callback(self):
         try:
@@ -199,7 +198,7 @@ class MainWindow(QMainWindow):
                 )[0]['assets'][0]['browser_download_url']
             # Current version is given as current_version at top of main.py.
         except Exception as e:
-            QMessageBox.warning(None, 'No internet connection',
+            QMessageBox.warning(self, 'No internet connection',
                                 f'Please check your internet connection.\nError------\n{e}')
 
         # Check if is latest version
@@ -287,14 +286,14 @@ class ImportXlsxThread(QRunnable):
         if pd.isnull(self.title):
             title = info_dict['Youtube_obj'].title
             info_dict['Title'] = "".join(
-                x for x in title if x not in "\\/:*?\"<>|\.")
+                x for x in title if x not in "\\/:*?\"<>|")
         else:
             info_dict['Title'] = self.title
         # artist text
         if pd.isnull(self.artist):
             artist = info_dict['Youtube_obj'].author
             info_dict['Artist'] = "".join(
-                x for x in artist if x not in "\\/:*?\"<>|\.")
+                x for x in artist if x not in "\\/:*?\"<>|")
         else:
             info_dict['Artist'] = self.artist
         self.signal.complete.emit(info_dict)

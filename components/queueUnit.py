@@ -45,11 +45,11 @@ class QueueUnit(QWidget):
         # title text
         self.__title_text = self.youtube_obj.title
         self.__title_text = "".join(
-            x for x in self.__title_text if x not in "\\/:*?\"<>|\.")
+            x for x in self.__title_text if x not in "\\/:*?\"<>|")
         # artist text
         self.__artist_text = self.youtube_obj.author
         self.__artist_text = "".join(
-            x for x in self.__artist_text if x not in "\\/:*?\"<>|\.")
+            x for x in self.__artist_text if x not in "\\/:*?\"<>|")
 
     def initData2(self, _props: dict):
         self.youtube_obj = _props['Youtube_obj']
@@ -59,6 +59,7 @@ class QueueUnit(QWidget):
         self.__artist_text = _props['Artist']
 
     def initQt(self):
+        __validator = QRegExpValidator(QRegExp("^[^\\\\/:*?\"<>|]*$"))  # \\/:*?\"<>|
         self.state = 'WAITING'  # WAITING, WORKING, COMPLETE, FAILED
 
         '''# youtube object
@@ -73,7 +74,7 @@ class QueueUnit(QWidget):
         layout = QGridLayout()
         layout.setSpacing(18)
 
-        # thumbnail
+        # Thumbnail
         '''url = self.youtube_obj.thumbnail_url   # derived from youtube_url
         data = urllib.request.urlopen(url).read()'''
         image = QImage()
@@ -87,19 +88,21 @@ class QueueUnit(QWidget):
 
         # Music title
         '''title = self.youtube_obj.title
-        title = "".join(x for x in title if x not in "\\/:*?\"<>|\.")'''
+        title = "".join(x for x in title if x not in "\\/:*?\"<>|")'''
         self.title = QLineEdit(text=f'{self.__title_text}', font=self.font)
-        self.title.setToolTip(f'{self.__title_text}')
+        self.title.setValidator(__validator)
+        self.title.setToolTip(self.title.text())
         self.title.setStyleSheet("QLineEdit {Background-color: transparent; padding: 2px; }"
                                  "QToolTip {background-color: white; color: black; border: 1px; }")
         self.title.setCursorPosition(0)
         layout.addWidget(self.title, 0, 1, 1, 10)
 
-        # artist
+        # Artist
         '''artist = self.youtube_obj.author
-        artist = "".join(x for x in artist if x not in "\\/:*?\"<>|\.")'''
+        artist = "".join(x for x in artist if x not in "\\/:*?\"<>|")'''
         self.artist = QLineEdit(text=f'{self.__artist_text}', font=self.font)
-        self.artist.setToolTip(f'{self.__artist_text}')
+        self.artist.setValidator(__validator)
+        self.artist.setToolTip(self.artist.text())
         self.artist.setStyleSheet("QLineEdit {Background-color: transparent; padding: 2px; }"
                                   "QToolTip {background-color: white; color: black; border: 1px; }")
         self.artist.setCursorPosition(0)

@@ -24,6 +24,7 @@ class SearchBar(QWidget):
         # searchbar
         self.searchbar = QLineEdit(font = self.font)
         self.searchbar.setPlaceholderText('Youtube URL')
+        self.searchbar.setToolTip("Press enter to add song to queue.")
         self.searchbar.setFixedHeight(self.label.sizeHint().height())
         self.searchbar.setMinimumWidth(400)
         self.searchbar.setGraphicsEffect(shadowEffect)

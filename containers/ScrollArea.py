@@ -55,7 +55,7 @@ class ScrollQueue(QScrollArea):
                         None, "URL warning", f"URL is not valid.\nError message------\n{e}")
         else:
             QMessageBox.information(
-                None, "Duplicate source", "This source has existed.")
+                None, "Duplicate source", "This song has existed.")
 
     def render_new_unit(self,unit:QueueUnit):
         self.units.append(unit)

@@ -30,7 +30,7 @@ class SettingArea(QWidget):
         self.searchbar = SearchBar(funcs=[self.create_unit])
         self.infoarea = Infoarea(funcs=[self.setInfos])
         # covert button
-        self.convert_btn = QPushButton(text='Convert', font=self.font)
+        self.convert_btn = QPushButton(text='Download', font=self.font)
         self.convert_btn.setFixedHeight(32)
         self.convert_btn.setStyleSheet(
             'QPushButton {border-radius: 12px; background-color: white; padding: 1px; }'
