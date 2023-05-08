@@ -16,7 +16,7 @@ from PyQt5.QtCore import *
 from containers.centralWidget import CentralWidget
 from components.queueUnit import QueueUnit
 
-current_version = 'v2.0.1'
+current_version = 'v2.0.2'
 
 
 class MainWindow(QMainWindow):
@@ -208,11 +208,15 @@ class MainWindow(QMainWindow):
                 '.')  # convert string to array
             latest_version_list = str(latest_version).split(
                 '.')  # convert string to array
-            if int(latest_version_list[0].strip('v')) > int(current_version_list[0].strip('v')):
-                isLatestVersion = False
-            if int(latest_version_list[1]) > int(current_version_list[1]) and not isLatestVersion:
-                isLatestVersion = False
-            if int(latest_version_list[2]) > int(current_version_list[2]) and not isLatestVersion:
+            if int(latest_version_list[0].strip('v')) < int(current_version_list[0].strip('v')):
+                isLatestVersion = True
+            elif int(latest_version_list[1]) < int(current_version_list[1]):
+                isLatestVersion = True
+            elif int(latest_version_list[2]) < int(current_version_list[2]):
+                isLatestVersion = True
+            elif latest_version_list == current_version_list:
+                isLatestVersion = True
+            else:
                 isLatestVersion = False
         except Exception as e:
             QMessageBox.warning(None, 'No internet connection',
