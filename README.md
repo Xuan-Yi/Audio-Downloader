@@ -9,11 +9,12 @@ pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
 
 ## Release
 
-> [Audio Downloader_v2.0.2](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v2.0.2)
+<!-- > [Audio Downloader_v2.0.2](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v2.0.2) -->
+- **The release versions is died**. Please directly run **main.py**. Remember to install the above packages beforehand.
 
-- This release works at my Win11, but not sure for other systems.
+<!-- - This release works at my Win11, but not sure for other systems.
 - Please **DO NOT** move _Audio Downloader_vx.x.x.exe_ out of the folder _Audio Downloader_vx.x.x_. You can place the folder anywhere.
-- Instead, create a **shortcut(捷徑)**, then you can access _Audio Downloader_vx.x.x.exe_ everywhere.
+- Instead, create a **shortcut(捷徑)**, then you can access _Audio Downloader_vx.x.x.exe_ everywhere. -->
 
 > This tool is **NOT FOR COMMERCIAL USAGE**, please be careful when using this kind of programs.
 
