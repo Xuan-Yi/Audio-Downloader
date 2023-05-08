@@ -44,7 +44,7 @@ pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
 
 ![image](images/xlsx_format.jpg)
 
-* Import pre-saved queue file bt **File > Import .xlsx**. Again, csv file is also available. 
+* Import pre-saved queue file bY **File > Import .xlsx**. Again, csv file is also available. 
  
 ![image](images/import_xlsx.jpg)
 
