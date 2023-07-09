@@ -59,7 +59,8 @@ class QueueUnit(QWidget):
         self.__artist_text = _props['Artist']
 
     def initQt(self):
-        __validator = QRegExpValidator(QRegExp("^[^\\\\/:*?\"<>|]*$"))  # \\/:*?\"<>|
+        __validator = QRegExpValidator(
+            QRegExp("^[^\\\\/:*?\"<>|]*$"))  # \\/:*?\"<>|
         self.state = 'WAITING'  # WAITING, WORKING, COMPLETE, FAILED
 
         '''# youtube object

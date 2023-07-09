@@ -1,16 +1,17 @@
 # Audio-Downloader
 
 ## Modules
+
 ```python
-# Python 3.11.1
-# pip 22.3.1
 pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
 ```
+
+> <span style="color:red">There's a existing bug with **pytube** now. You may refer to [this issue](https://github.com/pytube/pytube/issues/1678#issuecomment-1627081024) to fix it.</span>
 
 ## Release
 
 <!-- > [Audio Downloader_v2.0.2](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v2.0.2) -->
-- **The release versions is died**. Please directly run **main.py**. Remember to install the above packages beforehand.
+* **The release versions is died**. Please directly run **main.py**. Remember to install the above packages beforehand.
 
 <!-- - This release works at my Win11, but not sure for other systems.
 - Please **DO NOT** move _Audio Downloader_vx.x.x.exe_ out of the folder _Audio Downloader_vx.x.x_. You can place the folder anywhere.
@@ -18,14 +19,14 @@ pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
 
 > This tool is **NOT FOR COMMERCIAL USAGE**, please be careful when using this kind of programs.
 
-- This tiny program use [pytube](https://github.com/jiaaro/pydub.git) to download audio. Then convert the audio with [pydub](https://github.com/kkroening/ffmpeg-python.git) and add tags with [mutagen](https://pypi.org/project/mutagen/).
-- The GUI is powered by [PyQt5](https://pypi.org/project/PyQt5/)
-- **pydub requires ffmpeg, install it by yourself.** (also included in the release)
-- Available auio formats are
-  - flac
-  - mp3
-  - wav
-  - m4a
+* This tiny program use [pytube](https://github.com/jiaaro/pydub.git) to download audio. Then convert the audio with [pydub](https://github.com/kkroening/ffmpeg-python.git) and add tags with [mutagen](https://pypi.org/project/mutagen/).
+* The GUI is powered by [PyQt5](https://pypi.org/project/PyQt5/)
+* **pydub requires ffmpeg, install it by yourself.** (also included in the release)
+* Available auio formats are
+  * flac
+  * mp3
+  * wav
+  * m4a
 
 ## Introduction
 
@@ -35,7 +36,7 @@ pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
 * Please make sure that the directory is right.
 ![image](images/basics.jpg)
 
-* It will generate an unit and push into the queue. 
+* It will generate an unit and push into the queue.
 ![image](images/queue.jpg)
 
 ### Import the pre-saved queue file (xlsx or csv file)
@@ -45,11 +46,9 @@ pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
 
 ![image](images/xlsx_format.jpg)
 
-* Import pre-saved queue file bY **File > Import .xlsx**. Again, csv file is also available. 
- 
+* Import pre-saved queue file by **File > Import .xlsx**. Again, csv file is also available.
 ![image](images/import_xlsx.jpg)
-
 
 ## Copyright Claim
 
-- [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： <a href="https://www.flaticon.com/free-icons/headset" title="headset icons">Headset icons created by smalllikeart - Flaticon</a>
+* [icon.ico](https://github.com/Xuan-Yi/Audio-Downloader/blob/main/readme_imgs/window.jpg)： [headset icons](https://www.flaticon.com/free-icons/headset) Headset icons created by smalllikeart - Flaticon
