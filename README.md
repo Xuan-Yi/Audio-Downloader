@@ -1,53 +1,45 @@
 # Audio-Downloader
 
-## Modules
+> I did this program for fun. Don't try to use it for illegal purposes.
+
+* pydub requires [ffmpeg](https://ffmpeg.org/download.html), install it by yourself.
+* Due to YouTube's policy, pytube may sometimes do not work properly.
 
 ```python
-pip install PyQt5 pytube pydub requests pandas openpyxl mutagen
+pip install PyQt5 pydub requests pandas openpyxl mutagen
+python -m pip install git+https://github.com/pytube/pytube # install directly from repo for its frequent update
 ```
 
-> <span style="color:red">There's a existing bug with **pytube** now. You may refer to [this issue](https://github.com/pytube/pytube/issues/1678#issuecomment-1627081024) to fix it.</span>
+<!-- ## Release (Win11 only)
 
-## Release
+> [Audio Downloader_v2.0.2](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v2.0.2)
 
-<!-- > [Audio Downloader_v2.0.2](https://github.com/Xuan-Yi/Audio-Downloader/releases/tag/v2.0.2) -->
-* **The release versions is died**. Please directly run **main.py**. Remember to install the above packages beforehand.
-
-<!-- - This release works at my Win11, but not sure for other systems.
-- Please **DO NOT** move _Audio Downloader_vx.x.x.exe_ out of the folder _Audio Downloader_vx.x.x_. You can place the folder anywhere.
-- Instead, create a **shortcut(捷徑)**, then you can access _Audio Downloader_vx.x.x.exe_ everywhere. -->
-
-> This tool is **NOT FOR COMMERCIAL USAGE**, please be careful when using this kind of programs.
-
-* This tiny program use [pytube](https://github.com/jiaaro/pydub.git) to download audio. Then convert the audio with [pydub](https://github.com/kkroening/ffmpeg-python.git) and add tags with [mutagen](https://pypi.org/project/mutagen/).
-* The GUI is powered by [PyQt5](https://pypi.org/project/PyQt5/)
-* **pydub requires ffmpeg, install it by yourself.** (also included in the release)
-* Available auio formats are
-  * flac
-  * mp3
-  * wav
-  * m4a
+* Please **DO NOT** move _Audio Downloader_vx.x.x.exe_ out of the folder _Audio Downloader_vx.x.x_. You can place the folder anywhere.
+* Instead, create a **shortcut**, then you can access _Audio Downloader_vx.x.x.exe_ everywhere. -->
 
 ## Introduction
 
+* **flac**, **mp3**, **wav**, and **m4a** are supproted.
+
 ### Basics
 
-* Add a song to queue with following steps.
+* Enqueue a song by the following steps.
 * Please make sure that the directory is right.
 ![image](images/basics.jpg)
 
 * It will generate an unit and push into the queue.
 ![image](images/queue.jpg)
 
-### Import the pre-saved queue file (xlsx or csv file)
+### Import the music list (xlsx or csv)
 
 * An example of format is shown below. Meaning of colums from left ot right are **title, artist, url** respectively.
-* First row needn't be the same, since this program will just skip it.
+* Content of first row isn't important, since this program will just skip it.
 
-![image](images/xlsx_format.jpg)
+  ![image](images/xlsx_format.jpg)
 
-* Import pre-saved queue file by **File > Import .xlsx**. Again, csv file is also available.
-![image](images/import_xlsx.jpg)
+* Import music list by **File > Import .xlsx**.
+
+  ![image](images/import_xlsx.jpg)
 
 ## Copyright Claim
 
