@@ -353,6 +353,7 @@ class DownloadThread(QRunnable):
             self.signal.finish.emit(errMsg)
             return
 
+        m4a_exists_before = False
         try:
             # download returns the file path
             stream = yt.streams.get_audio_only()
@@ -361,7 +362,14 @@ class DownloadThread(QRunnable):
                 stream = yt.streams.filter(only_audio=True).first()
 
             if stream:
-                original_path = stream.download(output_path=self.dir)
+                # Check if file exists before downloading
+                expected_filename = stream.default_filename
+                expected_path = os.path.join(self.dir, expected_filename)
+                if os.path.exists(expected_path):
+                    m4a_exists_before = True
+                    original_path = expected_path
+                else:
+                    original_path = stream.download(output_path=self.dir)
             else:
                 errMsg += "Error: No audio stream found for this video.\n"
 
@@ -387,7 +395,8 @@ class DownloadThread(QRunnable):
                     if os.path.exists(original_path):
                         sound = AudioSegment.from_file(original_path)
                         sound.export(new_path, format_map[self.format])
-                        os.remove(original_path)
+                        if not m4a_exists_before:
+                            os.remove(original_path)
                     else:
                         errMsg += f"Download failed: File not found at {original_path}"
 
@@ -432,6 +441,19 @@ class DownloadThread(QRunnable):
                     audio.save()
             except Exception as e:
                 errMsg += f"Tag Error: {e}"
+
+        # Recover/Tag original m4a if preserved
+        if errMsg == "" and os.path.exists(original_path) and original_path.endswith(".m4a") and os.path.abspath(original_path) != os.path.abspath(new_path):
+            try:
+                audio = MP4(original_path)
+                audio["\xa9ART"] = self.artist  # artist
+                audio["aART"] = self.artist  # album artist
+                url = yt.thumbnail_url  # derived from youtube_url
+                data = urllib.request.urlopen(url).read()
+                audio["covr"] = [MP4Cover(data, imageformat=MP4Cover.FORMAT_JPEG)]
+                audio.save()
+            except Exception as e:
+                print(f"Warning: Could not tag original M4A: {e}")
 
         if errMsg == "":
             self.signal.finish.emit("Success")
