@@ -1,47 +1,52 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-
-shadowEffect = QGraphicsDropShadowEffect()
-shadowEffect.setBlurRadius(6)
-shadowEffect.setOffset(0,0)
-shadowEffect.setColor(QColor(0,0,0,100))
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from components.styles import Theme
 
 class SearchBar(QWidget):
-    def __init__(self,funcs:list, *args, **kwargs):
+    def __init__(self, funcs: list, *args, **kwargs):
         super().__init__(*args, **kwargs)
         [self.create_unit] = funcs
         
-        self.font = QFont('Segoe UI', 11)    
-        layout = QGridLayout()
-        layout.setSpacing(12)
+        self.initUI()
+
+    def initUI(self):
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(10)
         
-        # label
-        self.label = QLabel(font = self.font,text='Youtbe URL')
-        self.label.setAlignment(Qt.AlignRight)
-        self.label.setFixedHeight(32)
-        layout.addWidget(self.label,0,0,1,1)
-        # searchbar
-        self.searchbar = QLineEdit(font = self.font)
-        self.searchbar.setPlaceholderText('Youtube URL')
-        self.searchbar.setToolTip("Press enter to add song to queue.")
-        self.searchbar.setFixedHeight(self.label.sizeHint().height())
-        self.searchbar.setMinimumWidth(400)
-        self.searchbar.setGraphicsEffect(shadowEffect)
-        self.searchbar.setAlignment(Qt.AlignLeft)
-        self.searchbar.setStyleSheet('border-radius: 12px;  padding: 2px 8px;')
-        layout.addWidget(self.searchbar,0,1,1,6)
+        # Search Input
+        self.searchbar = QLineEdit()
+        self.searchbar.setPlaceholderText('Paste YouTube URL here...')
+        self.searchbar.setToolTip("Press Enter or click Add")
+        self.searchbar.setFixedHeight(42)
+        
+        # Add Button
+        self.add_btn = QPushButton("Add")
+        self.add_btn.setFixedSize(80, 42)
+        self.add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.add_btn.setStyleSheet(Theme.button_primary())
+        self.add_btn.clicked.connect(self.on_add_clicked)
+
+        layout.addWidget(self.searchbar, 1) # Stretch factor 1
+        layout.addWidget(self.add_btn)
         
         self.setLayout(layout)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Return:
-            url = str(self.searchbar.text())
+        if event.key() == Qt.Key.Key_Return:
+            self.on_add_clicked()
+
+    def on_add_clicked(self):
+        url = str(self.searchbar.text()).strip()
+        if url:
             self.searchbar.setText("")
             self.create_unit(url)
     
-    def setDisabled(self,disable:bool):
+    def setDisabled(self, disable: bool):
         self.searchbar.setDisabled(disable)
+        self.add_btn.setDisabled(disable)
             
-            
+    def updateTheme(self):
+        self.add_btn.setStyleSheet(Theme.button_primary())
     

@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from components.styles import Theme
 
-from components.lines import *
 from components.queueUnit import QueueUnit
 
-from pytube import YouTube
+from pytubefix import YouTube
 
 
 class ScrollQueue(QScrollArea):
@@ -13,22 +13,20 @@ class ScrollQueue(QScrollArea):
         super().__init__(*args, **kwargs)
         self.units = []
 
-        self.font = QFont('Segoe UI', 11)
         self.setWidgetResizable(True)
-        self.setStyleSheet("border: transparent;")
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.showFullScreen()
+        self.setStyleSheet(Theme.get_main_stylesheet()) # Apply global/scroll styles
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.initUI()
 
     def initUI(self):
-        layout = QVBoxLayout()
-        layout.setSpacing(12)
-        pwgt = QWidget()
-        # something should be added to layout
-        pwgt.setLayout(layout)
-        self.setWidget(pwgt)
-        self.setMinimumWidth(pwgt.sizeHint().width()+100)
-        self.setMaximumHeight(pwgt.sizeHint().height())
+        self.content_widget = QWidget()
+        self.content_layout = QVBoxLayout()
+        self.content_layout.setSpacing(10)
+        self.content_layout.setContentsMargins(10, 10, 10, 10)
+        self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        
+        self.content_widget.setLayout(self.content_layout)
+        self.setWidget(self.content_widget)
 
     def create_unit(self, url: str):
         exist = False
@@ -62,17 +60,15 @@ class ScrollQueue(QScrollArea):
         self.render_list()
     
     def render_list(self):
-        layout = QVBoxLayout()
-        layout.setSpacing(12)
-        pwgt = QWidget()
+        # Clear existing items from layout without deleting objects
+        while self.content_layout.count():
+            child = self.content_layout.takeAt(0)
+            if child.widget():
+                child.widget().setParent(None)
 
+        # Re-add all units
         for unit in self.units:
-            layout.addWidget(unit)
-
-        pwgt.setLayout(layout)
-        self.setWidget(pwgt)
-        self.setMinimumWidth(pwgt.sizeHint().width()+100)
-        self.setMaximumHeight(pwgt.sizeHint().height())
+            self.content_layout.addWidget(unit)
 
     def delete_unit_from_list(self, id: str):
         for unit in self.units:
@@ -83,3 +79,8 @@ class ScrollQueue(QScrollArea):
 
     def get_units(self):
         return self.units
+
+    def updateTheme(self):
+        self.setStyleSheet(Theme.get_main_stylesheet())
+        for unit in self.units:
+            unit.updateTheme()

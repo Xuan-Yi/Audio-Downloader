@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# uv
+.python-version
+# uv.lock is usually committed for applications, so we'll leave it out of .gitignore
+
+# IDEs
+.vscode/
+.idea/
+
+# Project specific
+run.txt
+build/
+dist/
+*.spec
+*.pptx
