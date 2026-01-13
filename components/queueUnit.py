@@ -151,6 +151,36 @@ class QueueUnit(QWidget):
         info_layout.addWidget(self.title)
         info_layout.addWidget(self.artist)
 
+        # Preview progress bar (visible only while playing)
+        self._preview_duration = 0
+        try:
+            self._preview_duration = int(getattr(self.youtube_obj, "length", 0) or 0)
+        except Exception:
+            self._preview_duration = 0
+        self.preview_progress = QProgressBar()
+        self.preview_progress.setFixedHeight(6)
+        self.preview_progress.setTextVisible(False)
+        self.preview_progress.setRange(0, max(1, self._preview_duration))
+        self.preview_progress.setValue(0)
+        self.preview_progress.setVisible(False)
+        self.preview_progress.setStyleSheet(f"""
+            QProgressBar {{
+                background-color: {Theme.SECONDARY_PRESSED};
+                border: 1px solid {Theme.BORDER};
+                border-radius: 3px;
+            }}
+            QProgressBar::chunk {{
+                background-color: {Theme.PRIMARY};
+                border-radius: 2px;
+            }}
+        """)
+
+        self._progress_timer = QTimer(self)
+        self._progress_timer.setInterval(250)
+        self._progress_timer.timeout.connect(self.__update_preview_progress)
+
+        info_layout.addWidget(self.preview_progress)
+
         layout.addLayout(info_layout, 1)
 
         # Status & Action Layout
@@ -200,7 +230,7 @@ class QueueUnit(QWidget):
         main_layout.addWidget(self.card)
 
         self.setLayout(main_layout)
-        self.setFixedHeight(100)  # Slightly taller to accommodate padding
+        self.setFixedHeight(112)  # Slightly taller to fit preview progress bar
         self.setMinimumWidth(380) # Ensure content fits horizontally
 
     def eventFilter(self, source, event):
@@ -270,15 +300,46 @@ class QueueUnit(QWidget):
             if state == "playing":
                 self.__set_player_state("playing")
                 self.play_btn.setToolTip("Pause Preview")
+                self.__start_progress()
             elif state == "buffering":
                 self.__set_player_state("buffering")
                 self.play_btn.setToolTip("Pause Preview")
+                self.__stop_progress(hide=True)
             else:
                 self.__set_player_state("paused")
                 self.play_btn.setToolTip("Play Preview")
+                self.__stop_progress(hide=True)
         else:
             self.__set_player_state("idle")
             self.play_btn.setToolTip("Play Preview")
+            self.__stop_progress(hide=True)
+
+    def __start_progress(self):
+        if self._preview_duration <= 0:
+            return
+        self.preview_progress.setVisible(True)
+        if not self._progress_timer.isActive():
+            self._progress_timer.start()
+        self.__update_preview_progress()
+
+    def __stop_progress(self, hide: bool = False):
+        if self._progress_timer.isActive():
+            self._progress_timer.stop()
+        if hide:
+            self.preview_progress.setVisible(False)
+        self.preview_progress.setValue(0)
+
+    def __update_preview_progress(self):
+        try:
+            from components.player import preview_player
+            pos = preview_player.get_playback_position(self.id)
+        except Exception:
+            pos = None
+        if pos is None:
+            return
+        if self._preview_duration > 0:
+            value = int(min(max(pos, 0.0), self._preview_duration))
+            self.preview_progress.setValue(value)
 
     def updateStatusDisplay(self):
         base_style = """
@@ -425,6 +486,17 @@ class QueueUnit(QWidget):
         self.__apply_player_icon()
         self.title.setStyleSheet(f"border: none; background: transparent; color: {Theme.TEXT_PRIMARY}; font-weight: bold; font-size: 11pt;")
         self.artist.setStyleSheet(f"border: none; background: transparent; color: {Theme.TEXT_SECONDARY}; font-size: 10pt;")
+        self.preview_progress.setStyleSheet(f"""
+            QProgressBar {{
+                background-color: {Theme.SECONDARY_PRESSED};
+                border: 1px solid {Theme.BORDER};
+                border-radius: 3px;
+            }}
+            QProgressBar::chunk {{
+                background-color: {Theme.PRIMARY};
+                border-radius: 2px;
+            }}
+        """)
         self.updateStatusDisplay()
         self.delete_btn.setStyleSheet(f"""
             QPushButton {{

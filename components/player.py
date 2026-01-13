@@ -180,5 +180,14 @@ class PreviewPlayer:
         self._state = "buffering"
         self.signals.state_changed.emit(video_id, "buffering")
 
+    def get_playback_position(self, video_id: str):
+        if self.current_video_id != video_id:
+            return None
+        if self._state == "playing" and self._play_start_time is not None:
+            return max(0.0, time.monotonic() - self._play_start_time)
+        if self._state in ("paused", "buffering"):
+            return max(0.0, self._playback_position)
+        return 0.0
+
 # Global instance
 preview_player = PreviewPlayer()
