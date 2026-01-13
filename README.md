@@ -27,7 +27,7 @@ uv run main.py
 
 ```powershell
 # Install dependencies
-pip install PyQt6 pydub requests pandas openpyxl mutagen pytubefix
+pip install PyQt6 pydub requests numpy pandas openpyxl mutagen pytubefix
 
 # Run the application
 python main.py
@@ -38,7 +38,7 @@ python main.py
 A YouTube audio downloader built with **PyQt6** and **pytubefix**.
 
 * **Supported formats**: flac, mp3, wav, and m4a.
-* **Features**: Batch downloading, user-friendly UI, and export/import music list.
+* **Features**: Batch downloading, user-friendly UI, preview playback with seekable progress, and export/import music list.
 
 ### Basics
 
@@ -46,6 +46,7 @@ A YouTube audio downloader built with **PyQt6** and **pytubefix**.
 2. Select your desired format and output directory.
 3. Click "Add" to enqueue the song.
 4. Manage your downloads in the queue area; you can remove pending or finished tasks anytime.
+5. Use the preview button to play/pause a short preview; drag the progress bar to seek.
 
 ### Import/Export music list
 
@@ -64,3 +65,9 @@ You can batch import songs using a spreadsheet (xlsx or csv). The program automa
 ## Copyright
 
 * **App Icon**: [headset icons](https://www.flaticon.com/free-icons/headset) created by smalllikeart - Flaticon
+
+## Usage & Legal
+
+This tool is intended for personal, lawful use only. You are responsible for complying with YouTube's Terms of Service and all applicable copyright laws in your jurisdiction.
+
+FFmpeg is required for audio processing and is distributed under its own licenses; see the [FFmpeg license page](https://ffmpeg.org/legal.html) for details.

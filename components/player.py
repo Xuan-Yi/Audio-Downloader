@@ -189,5 +189,10 @@ class PreviewPlayer:
             return max(0.0, self._playback_position)
         return 0.0
 
+    def seek(self, video_id: str, url: str, position: float):
+        if position is None or position < 0:
+            position = 0.0
+        self.play_preview(video_id, url, start_at=position)
+
 # Global instance
 preview_player = PreviewPlayer()

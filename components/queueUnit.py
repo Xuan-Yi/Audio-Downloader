@@ -19,6 +19,39 @@ formats = ["flac", "mp3", "m4a", "wav"]
 format_map = {"m4a": "mp4", "mp3": "mp3", "wav": "wav", "flac": "flac"}
 
 
+class PreviewSlider(QSlider):
+    def __init__(self, orientation, time_formatter):
+        super().__init__(orientation)
+        self._time_formatter = time_formatter
+
+    def _update_value_from_pos(self, pos_x: float):
+        width = max(1, self.width())
+        ratio = min(max(pos_x / width, 0.0), 1.0)
+        value = int(self.minimum() + ratio * (self.maximum() - self.minimum()))
+        self.setValue(value)
+
+    def _show_time_tooltip(self, pos_x: float):
+        if not self._time_formatter:
+            return
+        value = self.value()
+        text = self._time_formatter(value)
+        QToolTip.showText(self.mapToGlobal(QPoint(int(pos_x), -10)), text, self)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._update_value_from_pos(event.position().x())
+            self._show_time_tooltip(event.position().x())
+            event.accept()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            self._update_value_from_pos(event.position().x())
+            self._show_time_tooltip(event.position().x())
+            event.accept()
+        super().mouseMoveEvent(event)
+
+
 class QueueUnit(QWidget):
     def __init__(self, funcs: list = [], youtube_url: str = "", props: dict = {}, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -157,27 +190,40 @@ class QueueUnit(QWidget):
             self._preview_duration = int(getattr(self.youtube_obj, "length", 0) or 0)
         except Exception:
             self._preview_duration = 0
-        self.preview_progress = QProgressBar()
-        self.preview_progress.setFixedHeight(6)
-        self.preview_progress.setTextVisible(False)
+        self.preview_progress = PreviewSlider(Qt.Orientation.Horizontal, self.__format_time)
+        self.preview_progress.setFixedHeight(12)
         self.preview_progress.setRange(0, max(1, self._preview_duration))
         self.preview_progress.setValue(0)
+        self.preview_progress.setTracking(False)
         self.preview_progress.setVisible(False)
         self.preview_progress.setStyleSheet(f"""
-            QProgressBar {{
-                background-color: {Theme.SECONDARY_PRESSED};
+            QSlider::groove:horizontal {{
+                height: 6px;
+                background: {Theme.SECONDARY_PRESSED};
                 border: 1px solid {Theme.BORDER};
                 border-radius: 3px;
             }}
-            QProgressBar::chunk {{
-                background-color: {Theme.PRIMARY};
-                border-radius: 2px;
+            QSlider::sub-page:horizontal {{
+                background: {Theme.PRIMARY};
+                border-radius: 3px;
+            }}
+            QSlider::add-page:horizontal {{
+                background: transparent;
+            }}
+            QSlider::handle:horizontal {{
+                width: 10px;
+                margin: -3px 0;
+                background: {Theme.TEXT_PRIMARY};
+                border-radius: 5px;
             }}
         """)
 
         self._progress_timer = QTimer(self)
         self._progress_timer.setInterval(250)
         self._progress_timer.timeout.connect(self.__update_preview_progress)
+        self._is_seeking = False
+        self.preview_progress.sliderPressed.connect(self.__on_preview_seek_pressed)
+        self.preview_progress.sliderReleased.connect(self.__on_preview_seek_released)
 
         info_layout.addWidget(self.preview_progress)
 
@@ -300,18 +346,22 @@ class QueueUnit(QWidget):
             if state == "playing":
                 self.__set_player_state("playing")
                 self.play_btn.setToolTip("Pause Preview")
+                self.preview_progress.setEnabled(True)
                 self.__start_progress()
             elif state == "buffering":
                 self.__set_player_state("buffering")
                 self.play_btn.setToolTip("Pause Preview")
+                self.preview_progress.setEnabled(False)
                 self.__stop_progress(hide=True)
             else:
                 self.__set_player_state("paused")
                 self.play_btn.setToolTip("Play Preview")
+                self.preview_progress.setEnabled(True)
                 self.__stop_progress(hide=True)
         else:
             self.__set_player_state("idle")
             self.play_btn.setToolTip("Play Preview")
+            self.preview_progress.setEnabled(True)
             self.__stop_progress(hide=True)
 
     def __start_progress(self):
@@ -329,7 +379,18 @@ class QueueUnit(QWidget):
             self.preview_progress.setVisible(False)
         self.preview_progress.setValue(0)
 
+    def __format_time(self, seconds: int) -> str:
+        total = max(0, int(seconds))
+        hours = total // 3600
+        minutes = (total % 3600) // 60
+        secs = total % 60
+        if hours > 0:
+            return f"{hours}:{minutes:02d}:{secs:02d}"
+        return f"{minutes}:{secs:02d}"
+
     def __update_preview_progress(self):
+        if self._is_seeking:
+            return
         try:
             from components.player import preview_player
             pos = preview_player.get_playback_position(self.id)
@@ -340,6 +401,38 @@ class QueueUnit(QWidget):
         if self._preview_duration > 0:
             value = int(min(max(pos, 0.0), self._preview_duration))
             self.preview_progress.setValue(value)
+
+    def __on_preview_seek_pressed(self):
+        self._is_seeking = True
+        if self._progress_timer.isActive():
+            self._progress_timer.stop()
+
+    def __on_preview_seek_released(self):
+        if self._preview_duration <= 0:
+            return
+        try:
+            from components.player import preview_player
+            pos = preview_player.get_playback_position(self.id)
+        except Exception:
+            pos = None
+
+        if self._player_state == "buffering":
+            if pos is not None:
+                self.preview_progress.setValue(int(min(max(pos, 0.0), self._preview_duration)))
+            self._is_seeking = False
+            if self.preview_progress.isVisible():
+                self._progress_timer.start()
+            return
+
+        seek_to = float(self.preview_progress.value())
+        try:
+            from components.player import preview_player
+            preview_player.seek(self.id, self.url, seek_to)
+        except Exception:
+            pass
+        self._is_seeking = False
+        if self.preview_progress.isVisible():
+            self._progress_timer.start()
 
     def updateStatusDisplay(self):
         base_style = """
@@ -487,14 +580,24 @@ class QueueUnit(QWidget):
         self.title.setStyleSheet(f"border: none; background: transparent; color: {Theme.TEXT_PRIMARY}; font-weight: bold; font-size: 11pt;")
         self.artist.setStyleSheet(f"border: none; background: transparent; color: {Theme.TEXT_SECONDARY}; font-size: 10pt;")
         self.preview_progress.setStyleSheet(f"""
-            QProgressBar {{
-                background-color: {Theme.SECONDARY_PRESSED};
+            QSlider::groove:horizontal {{
+                height: 6px;
+                background: {Theme.SECONDARY_PRESSED};
                 border: 1px solid {Theme.BORDER};
                 border-radius: 3px;
             }}
-            QProgressBar::chunk {{
-                background-color: {Theme.PRIMARY};
-                border-radius: 2px;
+            QSlider::sub-page:horizontal {{
+                background: {Theme.PRIMARY};
+                border-radius: 3px;
+            }}
+            QSlider::add-page:horizontal {{
+                background: transparent;
+            }}
+            QSlider::handle:horizontal {{
+                width: 10px;
+                margin: -3px 0;
+                background: {Theme.TEXT_PRIMARY};
+                border-radius: 5px;
             }}
         """)
         self.updateStatusDisplay()
