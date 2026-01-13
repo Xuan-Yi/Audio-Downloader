@@ -197,6 +197,8 @@ class MainWindow(QMainWindow):
         sys.exit()
 
     def delete_all_complete_callback(self):
+        from components.player import preview_player
+        preview_player.stop()
         units = self.central_widget.queueArea.get_units()
         ids = []
         for unit in units:
@@ -206,6 +208,8 @@ class MainWindow(QMainWindow):
             self.central_widget.queueArea.delete_unit_from_list(id)
 
     def delete_all_failed_callback(self):
+        from components.player import preview_player
+        preview_player.stop()
         units = self.central_widget.queueArea.get_units()
         ids = []
         for unit in units:
@@ -215,6 +219,8 @@ class MainWindow(QMainWindow):
             self.central_widget.queueArea.delete_unit_from_list(id)
 
     def delete_all_callback(self):
+        from components.player import preview_player
+        preview_player.stop()
         units = self.central_widget.queueArea.get_units()
         ids = []
         for unit in units:
@@ -298,6 +304,14 @@ class MainWindow(QMainWindow):
         if event.key() == Qt.Key.Key_E and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             self.exit_callback()
 
+    def closeEvent(self, event):
+        try:
+            from components.player import preview_player
+            preview_player.force_stop_all()
+        except:
+            pass
+        event.accept()
+
 
 class ImportXlsxPoolThread(QThread):
     thread_list = []
@@ -362,6 +376,11 @@ class ImportXlsxThread(QRunnable):
 
 
 if __name__ == "__main__":
+    def exception_hook(exctype, value, traceback):
+        print(exctype, value, traceback)
+        sys.__excepthook__(exctype, value, traceback)
+    sys.excepthook = exception_hook
+
     app = QApplication(sys.argv)  # 系統視窗程式
     mw = MainWindow()
     mw.show()

@@ -31,12 +31,14 @@ class QueueUnit(QWidget):
         self.initQt()
 
     def initData1(self, _url: str):
+        print(f"DEBUG: initData1 start for {_url}")
         # youtube object
         self.youtube_obj = YouTube(_url)
         # id
         self.id = extract.video_id(_url)
         # thumbnail data
         url = self.youtube_obj.thumbnail_url  # derived from youtube_url
+        print(f"DEBUG: Fetching thumbnail from {url}")
         self.__thumbnail_data = urllib.request.urlopen(url).read()
         # title text
         self.__title_text = self.youtube_obj.title
@@ -44,6 +46,7 @@ class QueueUnit(QWidget):
         # artist text
         self.__artist_text = self.youtube_obj.author
         self.__artist_text = "".join(x for x in self.__artist_text if x not in '\\/:*?"<>|')
+        print("DEBUG: initData1 complete")
 
     def initData2(self, _props: dict):
         self.youtube_obj = _props["Youtube_obj"]
@@ -53,6 +56,7 @@ class QueueUnit(QWidget):
         self.__artist_text = _props["Artist"]
 
     def initQt(self):
+        print("DEBUG: initQt start")
         __validator = QRegularExpressionValidator(QRegularExpression('^[^\\\\/:*?"<>|]*$'))  # \\/:*?\"<>|
         self.state = "WAITING"  # WAITING, WORKING, COMPLETE, FAILED
         self.url = "https://youtu.be/" + self.id
@@ -72,6 +76,7 @@ class QueueUnit(QWidget):
         layout.setSpacing(15)
 
         # Thumbnail
+        print("DEBUG: Loading image data into QImage")
         image = QImage()
         image.loadFromData(self.__thumbnail_data)
         pixmap = QPixmap(image).scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatioByExpanding)
@@ -82,10 +87,47 @@ class QueueUnit(QWidget):
         self.thumbnail.setPixmap(pixmap)
         self.thumbnail.setScaledContents(True)
         self.thumbnail.setStyleSheet(f"border-radius: 4px; border: 1px solid {Theme.BORDER};")
+        self.thumbnail.installEventFilter(self)
+
+        # Play Button Overlay
+        self._player_state = "idle"
+        self._player_icon_cache = {}
+        self.play_btn = QPushButton("", self.thumbnail)
+        self.play_btn.setFixedSize(36, 36)
+        self.__center_play_button()
+        self.play_btn.setIconSize(QSize(18, 18))
+        self.play_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.play_btn.setToolTip("Play Preview")
+        self.play_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: rgba(0, 0, 0, 140);
+                color: #ffffff;
+                border-radius: 18px;
+                font-size: 18px;
+                border: 2px solid #ffffff;
+                text-align: center;
+                padding: 0px;
+            }}
+            QPushButton:hover {{
+                background-color: {Theme.PRIMARY};
+                border: 2px solid {Theme.PRIMARY};
+            }}
+        """)
+        self.__apply_player_icon()
+        self.play_btn.raise_()
+        self.play_btn.clicked.connect(self.__play_preview_callback)
+        
+        # Connect to player state changes
+        try:
+            from components.player import preview_player
+            preview_player.signals.state_changed.connect(self.__on_player_state_changed)
+        except Exception as e:
+            print(f"CRITICAL: Failed to connect to preview player: {e}")
 
         layout.addWidget(self.thumbnail)
 
         # Info Layout (Vertical: Title, Artist)
+        print("DEBUG: Setting up info layout")
         info_layout = QVBoxLayout()
         info_layout.setSpacing(4)
         info_layout.setContentsMargins(0, 0, 0, 0)
@@ -161,8 +203,82 @@ class QueueUnit(QWidget):
         self.setFixedHeight(100)  # Slightly taller to accommodate padding
         self.setMinimumWidth(380) # Ensure content fits horizontally
 
+    def eventFilter(self, source, event):
+        if source is self.thumbnail and event.type() == QEvent.Type.Resize:
+            self.__center_play_button()
+        return super().eventFilter(source, event)
+
+    def __center_play_button(self):
+        x = (self.thumbnail.width() - self.play_btn.width()) // 2
+        y = (self.thumbnail.height() - self.play_btn.height()) // 2
+        self.play_btn.move(x, y)
+
+    def __build_player_icon(self, state: str) -> QIcon:
+        size = 18
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor("#ffffff"))
+
+        if state == "play":
+            points = QPolygonF([
+                QPointF(size * 0.30, size * 0.20),
+                QPointF(size * 0.30, size * 0.80),
+                QPointF(size * 0.80, size * 0.50),
+            ])
+            painter.drawPolygon(points)
+        elif state == "pause":
+            bar_width = size * 0.22
+            gap = size * 0.12
+            left = (size - (2 * bar_width + gap)) / 2
+            top = size * 0.20
+            height = size * 0.60
+            painter.drawRoundedRect(QRectF(left, top, bar_width, height), 1.5, 1.5)
+            painter.drawRoundedRect(QRectF(left + bar_width + gap, top, bar_width, height), 1.5, 1.5)
+        painter.end()
+        return QIcon(pixmap)
+
+    def __apply_player_icon(self):
+        icon_state = "pause" if self._player_state in ("playing", "buffering") else "play"
+
+        if icon_state not in self._player_icon_cache:
+            self._player_icon_cache[icon_state] = self.__build_player_icon(icon_state)
+
+        self.play_btn.setIcon(self._player_icon_cache[icon_state])
+
+    def __set_player_state(self, state: str):
+        self._player_state = state
+        self.__apply_player_icon()
+
     def __delete_callback(self):
+        try:
+            from components.player import preview_player
+            preview_player.stop()
+        except:
+            pass
         self.delete_unit_from_list(self.id)
+
+    def __play_preview_callback(self):
+        from components.player import preview_player
+        preview_player.toggle(self.id, self.url)
+
+    def __on_player_state_changed(self, video_id, state):
+        if video_id == self.id:
+            if state == "playing":
+                self.__set_player_state("playing")
+                self.play_btn.setToolTip("Pause Preview")
+            elif state == "buffering":
+                self.__set_player_state("buffering")
+                self.play_btn.setToolTip("Pause Preview")
+            else:
+                self.__set_player_state("paused")
+                self.play_btn.setToolTip("Play Preview")
+        else:
+            self.__set_player_state("idle")
+            self.play_btn.setToolTip("Play Preview")
 
     def updateStatusDisplay(self):
         base_style = """
@@ -292,6 +408,21 @@ class QueueUnit(QWidget):
     def updateTheme(self):
         self.card.setStyleSheet(Theme.card_style())
         self.thumbnail.setStyleSheet(f"border-radius: 4px; border: 1px solid {Theme.BORDER};")
+        self.play_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: rgba(0, 0, 0, 150);
+                color: white;
+                border-radius: 15px;
+                font-size: 14px;
+                border: none;
+                padding: 0px;
+            }}
+            QPushButton:hover {{
+                background-color: {Theme.PRIMARY};
+            }}
+        """)
+        self._player_icon_cache.clear()
+        self.__apply_player_icon()
         self.title.setStyleSheet(f"border: none; background: transparent; color: {Theme.TEXT_PRIMARY}; font-weight: bold; font-size: 11pt;")
         self.artist.setStyleSheet(f"border: none; background: transparent; color: {Theme.TEXT_SECONDARY}; font-size: 10pt;")
         self.updateStatusDisplay()

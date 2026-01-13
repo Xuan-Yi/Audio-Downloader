@@ -45,14 +45,19 @@ class ScrollQueue(QScrollArea):
         if not exist:
             if youtube_obj != '':
                 try:
+                    print(f"DEBUG: Attempting to create QueueUnit for {url}")
                     new_unit = QueueUnit(youtube_url=url, funcs=[
                                          self.delete_unit_from_list])
                     self.units.append(new_unit)
                     self.render_list()
+                    print(f"DEBUG: Successfully created QueueUnit for {url}")
                     return new_unit
                 except Exception as e:
-                    QMessageBox.warning(
-                        None, "URL warning", f"URL is not valid.\nError message------\n{e}")
+                    import traceback
+                    err_details = traceback.format_exc()
+                    print(f"CRITICAL ERROR during QueueUnit creation:\n{err_details}")
+                    QMessageBox.critical(
+                        None, "Creation Error", f"Failed to create unit.\nError: {e}\n\nCheck console for details.")
         else:
             QMessageBox.information(
                 None, "Duplicate source", "This song has existed.")
