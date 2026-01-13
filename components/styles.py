@@ -2,9 +2,9 @@ from PyQt6.QtGui import QColor, QPalette
 
 class Theme:
     # Default to Light Theme values initially
-    PRIMARY = "#3b82f6"
-    PRIMARY_HOVER = "#2563eb"
-    PRIMARY_PRESSED = "#1d4ed8"
+    PRIMARY = "#ef4444"
+    PRIMARY_HOVER = "#dc2626"
+    PRIMARY_PRESSED = "#b91c1c"
     
     SECONDARY = "#ffffff"
     SECONDARY_HOVER = "#f3f4f6"
@@ -29,9 +29,9 @@ class Theme:
     @classmethod
     def set_theme(cls, mode: str):
         if mode == "dark":
-            cls.PRIMARY = "#60a5fa"        # Lighter blue for dark mode
-            cls.PRIMARY_HOVER = "#3b82f6"
-            cls.PRIMARY_PRESSED = "#2563eb"
+            cls.PRIMARY = "#f87171"        # Lighter red for dark mode
+            cls.PRIMARY_HOVER = "#ef4444"
+            cls.PRIMARY_PRESSED = "#dc2626"
             
             cls.SECONDARY = "#1f2937"      # Dark gray
             cls.SECONDARY_HOVER = "#374151"
@@ -50,9 +50,9 @@ class Theme:
             cls.WARNING = "#fbbf24"        # Lighter yellow
         else:
             # Light Theme (Reset to defaults)
-            cls.PRIMARY = "#3b82f6"
-            cls.PRIMARY_HOVER = "#2563eb"
-            cls.PRIMARY_PRESSED = "#1d4ed8"
+            cls.PRIMARY = "#ef4444"
+            cls.PRIMARY_HOVER = "#dc2626"
+            cls.PRIMARY_PRESSED = "#b91c1c"
             
             cls.SECONDARY = "#ffffff"
             cls.SECONDARY_HOVER = "#f3f4f6"

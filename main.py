@@ -16,8 +16,19 @@ from components.styles import Theme
 
 from containers.centralWidget import CentralWidget
 from components.queueUnit import QueueUnit
+import tomllib
+from pathlib import Path
 
-current_version = 'v2.0.2'
+def get_app_version():
+    try:
+        pyproject_path = Path(__file__).parent / "pyproject.toml"
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+            return f"v{data['project']['version']}"
+    except Exception:
+        return 'v0.0.0'
+
+current_version = get_app_version()
 
 
 class MainWindow(QMainWindow):
@@ -213,55 +224,75 @@ class MainWindow(QMainWindow):
             self.central_widget.queueArea.delete_unit_from_list(id)
 
     def github_repo_callback(self):
-        try:
-            webbrowser.open("https://github.com/Xuan-Yi/Audio-Downloader.git")
-        except Exception as e:
-            QMessageBox.warning(self, "No internet connection", f"Please check your internet connection.\nError------\n{e}")
+        reply = QMessageBox.question(
+            self, "Open GitHub Repository", 
+            "Would you like to open the GitHub repository in your browser?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                webbrowser.open("https://github.com/Xuan-Yi/Audio-Downloader.git")
+            except Exception as e:
+                QMessageBox.warning(self, "No internet connection", f"Please check your internet connection.\nError------\n{e}")
 
     def folder_location_callback(self):
         QMessageBox.information(self, "Folder location", os.getcwd())
 
     def version_info_callback(self):
+        latest_version = None
+        release_url = None
+
         try:
             response = requests.get("https://api.github.com/repos/Xuan-Yi/Audio-Downloader/releases/latest")
-            if response.status_code != 404:
-                latest_version = response.json()["tag_name"]
-                release_url = str(response.json()["assets"][0]["browser_download_url"])
+            if response.status_code == 200:
+                data = response.json()
+                latest_version = data.get("tag_name")
+                if data.get("assets"):
+                    release_url = data["assets"][0].get("browser_download_url")
             else:
                 response = requests.get("https://api.github.com/repos/Xuan-Yi/Audio-Downloader/releases")
-                latest_version = response.json()[0]["tag_name"]
-                release_url = response.json()[0]["assets"][0]["browser_download_url"]
-            # Current version is given as current_version at top of main.py.
+                if response.status_code == 200 and len(response.json()) > 0:
+                    data = response.json()[0]
+                    latest_version = data.get("tag_name")
+                    if data.get("assets"):
+                        release_url = data["assets"][0].get("browser_download_url")
         except Exception as e:
-            QMessageBox.warning(self, "No internet connection", f"Please check your internet connection.\nError------\n{e}")
+            QMessageBox.warning(self, "Network Error", f"Could not check for updates.\nError: {e}")
+            return
+
+        if not latest_version:
+            QMessageBox.information(self, "Version information", f"Current version: {current_version}\nNo remote version found.")
+            return
 
         # Check if is latest version
-        isLatestVersion = True
         try:
-            current_version_list = str(current_version).split(".")  # convert string to array
-            latest_version_list = str(latest_version).split(".")  # convert string to array
-            if int(latest_version_list[0].strip("v")) < int(current_version_list[0].strip("v")):
-                isLatestVersion = True
-            elif int(latest_version_list[1]) < int(current_version_list[1]):
-                isLatestVersion = True
-            elif int(latest_version_list[2]) < int(current_version_list[2]):
-                isLatestVersion = True
-            elif latest_version_list == current_version_list:
-                isLatestVersion = True
-            else:
-                isLatestVersion = False
+            def parse_version(v):
+                return tuple(map(int, v.strip("v").split(".")))
+
+            current_v = parse_version(current_version)
+            latest_v = parse_version(latest_version)
+            
+            isLatestVersion = current_v >= latest_v
         except Exception as e:
-            QMessageBox.warning(None, "No internet connection", f"Please check your internet connection.\nError------\n{e}")
+            QMessageBox.warning(None, "Version check error", f"Could not compare versions.\nError: {e}")
+            return
 
         # Show result
         if isLatestVersion:
             QMessageBox.information(None, "Version informations", f"Current version: {current_version}\nis latest.")
         else:
-            reply = QMessageBox.question(
-                None, "Version information", f"Latest version: {latest_version}\nCurrent version: {current_version}\nGet latest version?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No
-            )
-            if reply == QMessageBox.StandardButton.Yes:
-                webbrowser.open(release_url)
+            msg = f"Latest version: {latest_version}\nCurrent version: {current_version}"
+            if release_url:
+                reply = QMessageBox.question(
+                    None, "Update Available", f"{msg}\n\nGet latest version?", 
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
+                    QMessageBox.StandardButton.No
+                )
+                if reply == QMessageBox.StandardButton.Yes:
+                    webbrowser.open(release_url)
+            else:
+                QMessageBox.information(None, "Update Available", f"{msg}\n\nPlease check the GitHub repository for the release.")
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_E and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
