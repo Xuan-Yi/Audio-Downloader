@@ -51,15 +51,15 @@ A YouTube audio downloader built with **PyQt6** and **pytubefix**.
 
 You can batch import songs using a spreadsheet (xlsx or csv). The program automatically skips the header row.
 
-* Import your list via **File > Import as .xlsx** or **File > Import .csv**.
-* Export your list via **File > Export as .xlsx**.
+* Import your list via **File > Import .xlsx**. (Supports both .xlsx and .csv)
+* Export your list via **File > Export as .xlsx**. (Supports both .xlsx and .csv)
 
-**Teamplate:**
- | Title        | Artist         | URL                                   |
+**Template:**
+ | Title        | Artist         | Youtube URL                           |
  | ------------ | -------------- | ------------------------------------- |
  | Song Title   | Artist Name    | <https://www.youtube.com/watch?v=...> |
  | Another Song | Another Artist | <https://www.youtube.com/watch?v=...> |
- > Title and Artist are optional.
+ > Title and Artist are optional, but **Youtube URL** is required.
 
 ## Copyright
 

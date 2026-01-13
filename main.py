@@ -109,46 +109,61 @@ class MainWindow(QMainWindow):
         aboutmenu.addActions([action_folder_location])
 
     def import_xlsx_callback(self):
-        file = QFileDialog.getOpenFileName(None, "Open a xlsx or csv file...", QDir.homePath(), filter="xlsx(*.xlsx);;csv(*.csv)")[0]  # xlsx
+        filePath, _ = QFileDialog.getOpenFileName(self, "Import Music List", QDir.homePath(), "Excel files (*.xlsx);;CSV files (*.csv)")
 
-        if not os.path.exists(file):
-            pass
-        else:
-            # load excel data to pddataframe
-            root, extension = os.path.splitext(file)
+        if not filePath:
+            return
+
+        try:
+            if filePath.endswith('.xlsx'):
+                df = pd.read_excel(filePath)
+            elif filePath.endswith('.csv'):
+                df = pd.read_csv(filePath)
+            else:
+                QMessageBox.warning(self, "Unsupported File", f"The file {os.path.basename(filePath)} is not a supported format. Please use .xlsx or .csv.")
+                return
+
+            if "Youtube URL" not in df.columns:
+                raise ValueError("The file must contain a 'Youtube URL' column.")
+
+            df = df.dropna(axis="index", subset=["Youtube URL"], how="any")
+
+            self.poolthread = ImportXlsxPoolThread()
+            for i in range(len(df)):
+                row = df.iloc[i]
+                work = ImportXlsxThread()
+                work.setRow(row)
+                work.setDeleteUnitMethod(self.central_widget.queueArea.delete_unit_from_list)
+                work.signal.complete.connect(self.__import_xlsx_on_complete)
+                self.poolthread.addThread(work)
+            self.poolthread.start()
+        except Exception as e:
+            dir = os.path.dirname(filePath)
+            sample_path = os.path.join(dir, "Sample.xlsx")
+            sample_data = [["Never Gonna Give You Up", "Rick Astley", "https://youtu.be/dQw4w9WgXcQ"]]
+            df_sample = pd.DataFrame(sample_data, columns=["Title", "Artist", "Youtube URL"])
             try:
-                if extension == ".xlsx":
-                    df = pd.read_excel(file)
-                elif extension == ".csv":
-                    df = pd.read_csv(file)
-
-                # drop NaN
-                df = df.dropna(axis="index", subset=["Youtube URL"], how="any")
-                # create units
-                self.poolthread = ImportXlsxPoolThread()
-                for i in range(len(df)):
-                    row = df.iloc[i]
-                    work = ImportXlsxThread()
-                    work.setRow(row)
-                    work.setDeleteUnitMethod(self.central_widget.queueArea.delete_unit_from_list)
-                    work.signal.complete.connect(self.__import_xlsx_on_complete)
-                    self.poolthread.addThread(work)
-                self.poolthread.start()
-            except:
-                dir = os.path.dirname(file)
-                sample_path = os.path.join(dir, "Sample.xlsx")
-                sample_data = [["Never Gonna Give You Up", "Rick Astley", "https://youtu.be/dQw4w9WgXcQ"]]
-                df = pd.DataFrame(sample_data, columns=["Title", "Artist", "Youtube URL"])
-                df.to_excel(sample_path, index=False)
-                QMessageBox.warning(self, "Format problem occurs", f"{file}\ncannot be loaded successfully.\n\nModel file is saved to\\{sample_path}.")
+                df_sample.to_excel(sample_path, index=False)
+                QMessageBox.warning(self, "Import Error", f"'{os.path.basename(filePath)}' could not be loaded.\n\nA sample file has been created at:\n{sample_path}\n\nError: {e}")
+            except Exception as sample_e:
+                QMessageBox.warning(self, "Import Error", f"'{os.path.basename(filePath)}' could not be loaded and a sample file could not be created.\n\nImport Error: {e}\nSample Creation Error: {sample_e}")
 
     def __import_xlsx_on_complete(self, _props: dict):
         unit = QueueUnit(funcs=[self.central_widget.queueArea.delete_unit_from_list], props=_props)
         self.central_widget.queueArea.render_new_unit(unit)
 
     def export_xlsx_callback(self):
-        dir = QFileDialog.getExistingDirectory(None, "Open destination folder", QDir.homePath())  # 起始路徑
-        if dir != "":
+        current_time = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
+        suggested_filename = f"AudioDownloader_export_{current_time}.xlsx"
+
+        filePath, selected_filter = QFileDialog.getSaveFileName(
+            self,
+            "Export As",
+            os.path.join(QDir.homePath(), suggested_filename),
+            "Excel Files (*.xlsx);;CSV Files (*.csv)"
+        )
+
+        if filePath:
             units = self.central_widget.queueArea.get_units()
             data = []
             for unit in units:
@@ -156,8 +171,16 @@ class MainWindow(QMainWindow):
                 title = unit.getTitle()
                 artist = unit.getArtist()
                 data.append([title, artist, url])
+
             df = pd.DataFrame(data, columns=["Title", "Artist", "Youtube URL"])
-            df.to_excel(os.path.join(dir, f"AD_export_{time.time()}.xlsx"), index=False)
+
+            try:
+                if '(*.xlsx)' in selected_filter:
+                    df.to_excel(filePath, index=False)
+                elif '(*.csv)' in selected_filter:
+                    df.to_csv(filePath, index=False)
+            except Exception as e:
+                QMessageBox.warning(self, "Export Failed", f"Could not save file to '{filePath}'.\n\nError: {e}")
 
     def exit_callback(self):
         sys.exit()
@@ -278,8 +301,8 @@ class ImportXlsxThread(QRunnable):
 
     def setRow(self, _row):
         self.url = _row["Youtube URL"]
-        self.title = _row["Title"]
-        self.artist = _row["Artist"]
+        self.title = _row.get("Title")
+        self.artist = _row.get("Artist")
 
     def setDeleteUnitMethod(self, _func):
         self.delete_unit = _func
