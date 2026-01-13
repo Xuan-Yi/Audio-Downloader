@@ -159,6 +159,7 @@ class QueueUnit(QWidget):
 
         self.setLayout(main_layout)
         self.setFixedHeight(100)  # Slightly taller to accommodate padding
+        self.setMinimumWidth(380) # Ensure content fits horizontally
 
     def __delete_callback(self):
         self.delete_unit_from_list(self.id)

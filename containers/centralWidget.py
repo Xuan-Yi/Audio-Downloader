@@ -13,7 +13,7 @@ class CentralWidget(QWidget):
         self.initUI()
 
     def initUI(self):
-        [self.format, self.dir] = ['flac', QDir.homePath()]
+        [self.format, self.dir] = ['flac', QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DownloadLocation)]
 
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)

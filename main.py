@@ -55,6 +55,7 @@ class MainWindow(QMainWindow):
     def initUI(self):
         # layout
         self.showMaximized()
+        self.setMinimumWidth(440) # Ensure content fits horizontally
         self.setWindowIcon(QIcon(r'images\icon.ico'))
         self.setWindowTitle("Audio Downloader")
         

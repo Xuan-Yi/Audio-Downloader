@@ -16,10 +16,12 @@ class ScrollQueue(QScrollArea):
         self.setWidgetResizable(True)
         self.setStyleSheet(Theme.get_main_stylesheet()) # Apply global/scroll styles
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setMinimumHeight(120) # Ensure at least one unit is visible
         self.initUI()
 
     def initUI(self):
         self.content_widget = QWidget()
+        self.content_widget.setMinimumWidth(400) # Ensure units have enough horizontal space
         self.content_layout = QVBoxLayout()
         self.content_layout.setSpacing(10)
         self.content_layout.setContentsMargins(10, 10, 10, 10)

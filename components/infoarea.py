@@ -5,13 +5,30 @@ from components.styles import Theme
 
 formats = ['flac','mp3','m4a','wav']
 
+class ElidedLabel(QLabel):
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self._full_text = text
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+
+    def setText(self, text):
+        self._full_text = text
+        super().setText(text) # Keep internal state for accessibility/tooltips
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        metrics = QFontMetrics(self.font())
+        elided = metrics.elidedText(self._full_text, Qt.TextElideMode.ElideMiddle, self.width())
+        painter.drawText(self.rect(), self.alignment(), elided)
+
 class Infoarea(QWidget):
     def __init__(self, funcs: list, *args, **kwargs):
         super().__init__(*args, **kwargs)
         [self.setInfos] = funcs
         
         self.output_format = 'flac'
-        self.dir = QDir.homePath()
+        self.dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DownloadLocation)
         
         self.initUI()
 
@@ -44,14 +61,9 @@ class Infoarea(QWidget):
         self.openFolderBtn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.openFolderBtn.clicked.connect(self.__open_folder_callback)
         
-        self.dirT = QLabel(f'{self.dir}')
+        self.dirT = ElidedLabel(f'{self.dir}')
         self.dirT.setStyleSheet(f'color: {Theme.TEXT_SECONDARY}; font-style: italic;')
-        self.dirT.setWordWrap(False)
-        
-        # Elide text for long paths
-        font_metrics = QFontMetrics(self.dirT.font())
-        elided_text = font_metrics.elidedText(self.dir, Qt.TextElideMode.ElideMiddle, 300)
-        self.dirT.setText(elided_text)
+        # No need to set word wrap or manually elide
         
         dir_layout.addWidget(self.openFolderBtn)
         dir_layout.addWidget(self.dirT, 1)
@@ -69,9 +81,7 @@ class Infoarea(QWidget):
         dir = QFileDialog.getExistingDirectory(None, "Open destination folder", QDir.homePath())
         if dir != "":
             self.dir = dir
-            font_metrics = QFontMetrics(self.dirT.font())
-            elided_text = font_metrics.elidedText(self.dir, Qt.TextElideMode.ElideMiddle, 300)
-            self.dirT.setText(elided_text)
+            self.dirT.setText(dir)
             self.dirT.setToolTip(dir)
         self.setInfos(format=self.output_format, dir=self.dir)
         
