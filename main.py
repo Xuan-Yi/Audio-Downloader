@@ -28,6 +28,16 @@ def get_app_version():
     except Exception:
         return 'v0.0.0'
 
+def get_remote_version():
+    try:
+        url = "https://raw.githubusercontent.com/Xuan-Yi/Audio-Downloader/main/pyproject.toml"
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = tomllib.loads(response.text)
+        return f"v{data['project']['version']}"
+    except Exception:
+        return None
+
 current_version = get_app_version()
 
 
@@ -250,19 +260,21 @@ class MainWindow(QMainWindow):
         release_url = None
 
         try:
-            response = requests.get("https://api.github.com/repos/Xuan-Yi/Audio-Downloader/releases/latest")
-            if response.status_code == 200:
-                data = response.json()
-                latest_version = data.get("tag_name")
-                if data.get("assets"):
-                    release_url = data["assets"][0].get("browser_download_url")
-            else:
-                response = requests.get("https://api.github.com/repos/Xuan-Yi/Audio-Downloader/releases")
-                if response.status_code == 200 and len(response.json()) > 0:
-                    data = response.json()[0]
+            latest_version = get_remote_version()
+            if not latest_version:
+                response = requests.get("https://api.github.com/repos/Xuan-Yi/Audio-Downloader/releases/latest")
+                if response.status_code == 200:
+                    data = response.json()
                     latest_version = data.get("tag_name")
                     if data.get("assets"):
                         release_url = data["assets"][0].get("browser_download_url")
+                else:
+                    response = requests.get("https://api.github.com/repos/Xuan-Yi/Audio-Downloader/releases")
+                    if response.status_code == 200 and len(response.json()) > 0:
+                        data = response.json()[0]
+                        latest_version = data.get("tag_name")
+                        if data.get("assets"):
+                            release_url = data["assets"][0].get("browser_download_url")
         except Exception as e:
             QMessageBox.warning(self, "Network Error", f"Could not check for updates.\nError: {e}")
             return
