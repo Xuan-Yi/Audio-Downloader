@@ -44,11 +44,9 @@ class ScrollQueue(QScrollArea):
         if not exist:
             if youtube_obj != "":
                 try:
-                    print(f"DEBUG: Attempting to create QueueUnit for {url}")
                     new_unit = QueueUnit(youtube_url=url, funcs=[self.delete_unit_from_list])
                     self.units.append(new_unit)
                     self.render_list()
-                    print(f"DEBUG: Successfully created QueueUnit for {url}")
                     return new_unit
                 except Exception as e:
                     import traceback

@@ -64,14 +64,12 @@ class QueueUnit(QWidget):
         self.initQt()
 
     def initData1(self, _url: str):
-        print(f"DEBUG: initData1 start for {_url}")
         # youtube object
         self.youtube_obj = YouTube(_url)
         # id
         self.id = extract.video_id(_url)
         # thumbnail data
         url = self.youtube_obj.thumbnail_url  # derived from youtube_url
-        print(f"DEBUG: Fetching thumbnail from {url}")
         self.__thumbnail_data = urllib.request.urlopen(url).read()
         # title text
         self.__title_text = self.youtube_obj.title
@@ -79,7 +77,6 @@ class QueueUnit(QWidget):
         # artist text
         self.__artist_text = self.youtube_obj.author
         self.__artist_text = "".join(x for x in self.__artist_text if x not in '\\/:*?"<>|')
-        print("DEBUG: initData1 complete")
 
     def initData2(self, _props: dict):
         self.youtube_obj = _props["Youtube_obj"]
@@ -89,7 +86,6 @@ class QueueUnit(QWidget):
         self.__artist_text = _props["Artist"]
 
     def initQt(self):
-        print("DEBUG: initQt start")
         __validator = QRegularExpressionValidator(QRegularExpression('^[^\\\\/:*?"<>|]*$'))  # \\/:*?\"<>|
         self.state = "WAITING"  # WAITING, WORKING, COMPLETE, FAILED
         self.url = "https://youtu.be/" + self.id
@@ -109,7 +105,6 @@ class QueueUnit(QWidget):
         layout.setSpacing(15)
 
         # Thumbnail
-        print("DEBUG: Loading image data into QImage")
         image = QImage()
         image.loadFromData(self.__thumbnail_data)
         pixmap = QPixmap(image).scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatioByExpanding)
@@ -161,7 +156,6 @@ class QueueUnit(QWidget):
         layout.addWidget(self.thumbnail)
 
         # Info Layout (Vertical: Title, Artist)
-        print("DEBUG: Setting up info layout")
         info_layout = QVBoxLayout()
         info_layout.setSpacing(4)
         info_layout.setContentsMargins(0, 0, 0, 0)
