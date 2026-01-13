@@ -115,7 +115,6 @@ class Theme:
                 border-bottom: 2px solid {Theme.TEXT_SECONDARY};
                 width: 8px;
                 height: 8px;
-                transform: rotate(-45deg);
                 margin-right: 10px;
                 margin-top: -2px; 
             }}
