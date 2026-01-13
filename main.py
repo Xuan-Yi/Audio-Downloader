@@ -19,6 +19,7 @@ from components.queueUnit import QueueUnit
 import tomllib
 from pathlib import Path
 
+
 def get_app_version():
     try:
         pyproject_path = Path(__file__).parent / "pyproject.toml"
@@ -26,7 +27,8 @@ def get_app_version():
             data = tomllib.load(f)
             return f"v{data['project']['version']}"
     except Exception:
-        return 'v0.0.0'
+        return "v0.0.0"
+
 
 def get_remote_version():
     try:
@@ -37,6 +39,7 @@ def get_remote_version():
         return f"v{data['project']['version']}"
     except Exception:
         return None
+
 
 current_version = get_app_version()
 
@@ -54,9 +57,9 @@ class MainWindow(QMainWindow):
             Theme.set_theme("dark")
         else:
             Theme.set_theme("light")
-        
+
         app.setStyleSheet(Theme.get_main_stylesheet())
-            
+
         # Monitor Theme Changes
         app.styleHints().colorSchemeChanged.connect(self.theme_changed)
 
@@ -65,21 +68,21 @@ class MainWindow(QMainWindow):
             Theme.set_theme("dark")
         else:
             Theme.set_theme("light")
-        
+
         QApplication.instance().setStyleSheet(Theme.get_main_stylesheet())
         self.updateTheme()
 
     def updateTheme(self):
-        if hasattr(self, 'central_widget'):
+        if hasattr(self, "central_widget"):
             self.central_widget.updateTheme()
 
     def initUI(self):
         # layout
         self.showMaximized()
-        self.setMinimumWidth(440) # Ensure content fits horizontally
-        self.setWindowIcon(QIcon(r'images\icon.ico'))
+        self.setMinimumWidth(440)  # Ensure content fits horizontally
+        self.setWindowIcon(QIcon(r"images\icon.ico"))
         self.setWindowTitle("Audio Downloader")
-        
+
         self.menubar()
         # central widget
         self.central_widget = CentralWidget()
@@ -136,9 +139,9 @@ class MainWindow(QMainWindow):
             return
 
         try:
-            if filePath.endswith('.xlsx'):
+            if filePath.endswith(".xlsx"):
                 df = pd.read_excel(filePath)
-            elif filePath.endswith('.csv'):
+            elif filePath.endswith(".csv"):
                 df = pd.read_csv(filePath)
             else:
                 QMessageBox.warning(self, "Unsupported File", f"The file {os.path.basename(filePath)} is not a supported format. Please use .xlsx or .csv.")
@@ -177,12 +180,7 @@ class MainWindow(QMainWindow):
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
         suggested_filename = f"AudioDownloader_export_{current_time}.xlsx"
 
-        filePath, selected_filter = QFileDialog.getSaveFileName(
-            self,
-            "Export As",
-            os.path.join(QDir.homePath(), suggested_filename),
-            "Excel Files (*.xlsx);;CSV Files (*.csv)"
-        )
+        filePath, selected_filter = QFileDialog.getSaveFileName(self, "Export As", os.path.join(QDir.homePath(), suggested_filename), "Excel Files (*.xlsx);;CSV Files (*.csv)")
 
         if filePath:
             units = self.central_widget.queueArea.get_units()
@@ -196,9 +194,9 @@ class MainWindow(QMainWindow):
             df = pd.DataFrame(data, columns=["Title", "Artist", "Youtube URL"])
 
             try:
-                if '(*.xlsx)' in selected_filter:
+                if "(*.xlsx)" in selected_filter:
                     df.to_excel(filePath, index=False)
-                elif '(*.csv)' in selected_filter:
+                elif "(*.csv)" in selected_filter:
                     df.to_csv(filePath, index=False)
             except Exception as e:
                 QMessageBox.warning(self, "Export Failed", f"Could not save file to '{filePath}'.\n\nError: {e}")
@@ -208,6 +206,7 @@ class MainWindow(QMainWindow):
 
     def delete_all_complete_callback(self):
         from components.player import preview_player
+
         preview_player.stop()
         units = self.central_widget.queueArea.get_units()
         ids = []
@@ -219,6 +218,7 @@ class MainWindow(QMainWindow):
 
     def delete_all_failed_callback(self):
         from components.player import preview_player
+
         preview_player.stop()
         units = self.central_widget.queueArea.get_units()
         ids = []
@@ -230,6 +230,7 @@ class MainWindow(QMainWindow):
 
     def delete_all_callback(self):
         from components.player import preview_player
+
         preview_player.stop()
         units = self.central_widget.queueArea.get_units()
         ids = []
@@ -240,12 +241,7 @@ class MainWindow(QMainWindow):
             self.central_widget.queueArea.delete_unit_from_list(id)
 
     def github_repo_callback(self):
-        reply = QMessageBox.question(
-            self, "Open GitHub Repository", 
-            "Would you like to open the GitHub repository in your browser?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No
-        )
+        reply = QMessageBox.question(self, "Open GitHub Repository", "Would you like to open the GitHub repository in your browser?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             try:
                 webbrowser.open("https://github.com/Xuan-Yi/Audio-Downloader.git")
@@ -285,12 +281,13 @@ class MainWindow(QMainWindow):
 
         # Check if is latest version
         try:
+
             def parse_version(v):
                 return tuple(map(int, v.strip("v").split(".")))
 
             current_v = parse_version(current_version)
             latest_v = parse_version(latest_version)
-            
+
             isLatestVersion = current_v >= latest_v
         except Exception as e:
             QMessageBox.warning(None, "Version check error", f"Could not compare versions.\nError: {e}")
@@ -302,11 +299,7 @@ class MainWindow(QMainWindow):
         else:
             msg = f"Latest version: {latest_version}\nCurrent version: {current_version}"
             if release_url:
-                reply = QMessageBox.question(
-                    None, "Update Available", f"{msg}\n\nGet latest version?", 
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
-                    QMessageBox.StandardButton.No
-                )
+                reply = QMessageBox.question(None, "Update Available", f"{msg}\n\nGet latest version?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
                 if reply == QMessageBox.StandardButton.Yes:
                     webbrowser.open(release_url)
             else:
@@ -319,6 +312,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         try:
             from components.player import preview_player
+
             preview_player.force_stop_all()
         except:
             pass
@@ -388,12 +382,14 @@ class ImportXlsxThread(QRunnable):
 
 
 if __name__ == "__main__":
+
     def exception_hook(exctype, value, traceback):
         print(exctype, value, traceback)
         sys.__excepthook__(exctype, value, traceback)
+
     sys.excepthook = exception_hook
 
-    app = QApplication(sys.argv)  # 系統視窗程式
+    app = QApplication(sys.argv)  # System window app
     mw = MainWindow()
     mw.show()
-    sys.exit(app.exec())  # 偵測視窗關閉後結束程式
+    sys.exit(app.exec())  # Exit when the window is closed

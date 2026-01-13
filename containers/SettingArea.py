@@ -6,6 +6,7 @@ from components.styles import Theme
 from components.searchbar import SearchBar
 from components.infoarea import Infoarea
 
+
 class SettingArea(QWidget):
     def __init__(self, funcs: list, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,23 +22,23 @@ class SettingArea(QWidget):
 
         # Search Section
         self.searchbar = SearchBar(funcs=[self.create_unit])
-        
+
         # Options Section (Info Area)
         self.infoarea = Infoarea(funcs=[self.setInfos])
-        
+
         # Action Section (Download Button)
-        self.convert_btn = QPushButton(text='Download All')
+        self.convert_btn = QPushButton(text="Download All")
         self.convert_btn.setFixedHeight(42)
         self.convert_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.convert_btn.setStyleSheet(Theme.button_primary())
         self.convert_btn.setFont(QFont(Theme.FONT_FAMILY, 11, QFont.Weight.Bold))
         self.convert_btn.clicked.connect(self.onConvertBtnClicked)
-        
+
         self.layout.addWidget(self.searchbar)
         self.layout.addWidget(self.infoarea)
         self.layout.addSpacing(10)
         self.layout.addWidget(self.convert_btn)
-        
+
         self.setLayout(self.layout)
 
     def onConvertBtnClicked(self):

@@ -1,23 +1,24 @@
 from PyQt6.QtGui import QColor, QPalette
 
+
 class Theme:
     # Default to Light Theme values initially
     PRIMARY = "#ef4444"
     PRIMARY_HOVER = "#dc2626"
     PRIMARY_PRESSED = "#b91c1c"
-    
+
     SECONDARY = "#ffffff"
     SECONDARY_HOVER = "#f3f4f6"
     SECONDARY_PRESSED = "#e5e7eb"
-    
+
     BACKGROUND = "#f9fafb"
     SURFACE = "#ffffff"
-    
+
     TEXT_PRIMARY = "#111827"
     TEXT_SECONDARY = "#6b7280"
-    
+
     BORDER = "#e5e7eb"
-    
+
     ERROR = "#ef4444"
     SUCCESS = "#10b981"
     WARNING = "#f59e0b"
@@ -29,43 +30,43 @@ class Theme:
     @classmethod
     def set_theme(cls, mode: str):
         if mode == "dark":
-            cls.PRIMARY = "#f87171"        # Lighter red for dark mode
+            cls.PRIMARY = "#f87171"  # Lighter red for dark mode
             cls.PRIMARY_HOVER = "#ef4444"
             cls.PRIMARY_PRESSED = "#dc2626"
-            
-            cls.SECONDARY = "#1f2937"      # Dark gray
+
+            cls.SECONDARY = "#1f2937"  # Dark gray
             cls.SECONDARY_HOVER = "#374151"
             cls.SECONDARY_PRESSED = "#4b5563"
-            
-            cls.BACKGROUND = "#111827"     # Very dark blue/gray
-            cls.SURFACE = "#1f2937"        # Dark gray surface
-            
-            cls.TEXT_PRIMARY = "#f9fafb"   # White text
-            cls.TEXT_SECONDARY = "#9ca3af" # Light gray text
-            
-            cls.BORDER = "#374151"         # Darker border
-            
-            cls.ERROR = "#f87171"          # Lighter red
-            cls.SUCCESS = "#34d399"        # Lighter green
-            cls.WARNING = "#fbbf24"        # Lighter yellow
+
+            cls.BACKGROUND = "#111827"  # Very dark blue/gray
+            cls.SURFACE = "#1f2937"  # Dark gray surface
+
+            cls.TEXT_PRIMARY = "#f9fafb"  # White text
+            cls.TEXT_SECONDARY = "#9ca3af"  # Light gray text
+
+            cls.BORDER = "#374151"  # Darker border
+
+            cls.ERROR = "#f87171"  # Lighter red
+            cls.SUCCESS = "#34d399"  # Lighter green
+            cls.WARNING = "#fbbf24"  # Lighter yellow
         else:
             # Light Theme (Reset to defaults)
             cls.PRIMARY = "#ef4444"
             cls.PRIMARY_HOVER = "#dc2626"
             cls.PRIMARY_PRESSED = "#b91c1c"
-            
+
             cls.SECONDARY = "#ffffff"
             cls.SECONDARY_HOVER = "#f3f4f6"
             cls.SECONDARY_PRESSED = "#e5e7eb"
-            
+
             cls.BACKGROUND = "#f9fafb"
             cls.SURFACE = "#ffffff"
-            
+
             cls.TEXT_PRIMARY = "#111827"
             cls.TEXT_SECONDARY = "#6b7280"
-            
+
             cls.BORDER = "#e5e7eb"
-            
+
             cls.ERROR = "#ef4444"
             cls.SUCCESS = "#10b981"
             cls.WARNING = "#f59e0b"
@@ -201,7 +202,7 @@ class Theme:
                 background-color: {Theme.SECONDARY_PRESSED};
             }}
         """
-        
+
     @staticmethod
     def card_style():
         return f"""

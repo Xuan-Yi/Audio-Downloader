@@ -6,8 +6,10 @@ from pytubefix import YouTube
 import os
 import atexit
 
+
 class PlayerSignals(QObject):
     state_changed = pyqtSignal(str, str)
+
 
 class PreviewPlayer:
     def __init__(self):
@@ -28,8 +30,7 @@ class PreviewPlayer:
         """Forcefully kill any ffplay process started by the app."""
         try:
             # Kill by image name to be absolutely sure nothing remains
-            subprocess.run(['taskkill', '/F', '/IM', 'ffplay.exe'], 
-                         creationflags=0x08000000, capture_output=True)
+            subprocess.run(["taskkill", "/F", "/IM", "ffplay.exe"], creationflags=0x08000000, capture_output=True)
         except:
             pass
 
@@ -40,12 +41,8 @@ class PreviewPlayer:
         self._playback_position = max(0.0, start_at)
         self._play_start_time = time.monotonic() - self._playback_position
         self._set_buffering(video_id)
-        
-        thread = threading.Thread(
-            target=self._fetch_and_start,
-            args=(video_id, url, self._playback_position),
-            daemon=True
-        )
+
+        thread = threading.Thread(target=self._fetch_and_start, args=(video_id, url, self._playback_position), daemon=True)
         thread.start()
 
     def _fetch_and_start(self, video_id, url, start_at: float):
@@ -57,8 +54,8 @@ class PreviewPlayer:
                 if start_at > 0:
                     cmd.extend(["-ss", f"{start_at:.3f}"])
                 cmd.append(stream.url)
-                creationflags = 0x08000000 # CREATE_NO_WINDOW
-                
+                creationflags = 0x08000000  # CREATE_NO_WINDOW
+
                 if self._pending_id != video_id:
                     return
 
@@ -74,9 +71,9 @@ class PreviewPlayer:
                 self.current_url = url
                 self._is_paused = False
                 self._state = "playing"
-                
+
                 self.signals.state_changed.emit(video_id, "playing")
-                
+
                 proc.wait()
 
                 if self.current_video_id == video_id and not self._is_stopping and self._state != "paused":
@@ -117,8 +114,7 @@ class PreviewPlayer:
                 self._state = "paused"
                 self.signals.state_changed.emit(self.current_video_id, "paused")
             pid = self.process.pid
-            subprocess.run(['taskkill', '/F', '/T', '/PID', str(pid)],
-                         creationflags=0x08000000, capture_output=True)
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], creationflags=0x08000000, capture_output=True)
             self.process = None
             self._play_start_time = None
         except:
@@ -144,23 +140,22 @@ class PreviewPlayer:
         self._pending_id = None
         if self._is_stopping:
             return
-            
+
         self._is_stopping = True
         if self.process:
             try:
                 pid = self.process.pid
                 # Kill the specific process tree
-                subprocess.run(['taskkill', '/F', '/T', '/PID', str(pid)], 
-                             creationflags=0x08000000, capture_output=True)
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], creationflags=0x08000000, capture_output=True)
             except:
                 pass
             self.process = None
-            
+
         if self.current_video_id:
             self._finalize_playback("stopped", self.current_video_id)
         elif pending_id:
             self._finalize_playback("stopped", pending_id)
-        
+
         self._is_stopping = False
 
     def _finalize_playback(self, state: str, video_id: str):
@@ -193,6 +188,7 @@ class PreviewPlayer:
         if position is None or position < 0:
             position = 0.0
         self.play_preview(video_id, url, start_at=position)
+
 
 # Global instance
 preview_player = PreviewPlayer()

@@ -149,10 +149,11 @@ class QueueUnit(QWidget):
         self.__apply_player_icon()
         self.play_btn.raise_()
         self.play_btn.clicked.connect(self.__play_preview_callback)
-        
+
         # Connect to player state changes
         try:
             from components.player import preview_player
+
             preview_player.signals.state_changed.connect(self.__on_player_state_changed)
         except Exception as e:
             print(f"CRITICAL: Failed to connect to preview player: {e}")
@@ -243,8 +244,6 @@ class QueueUnit(QWidget):
 
         action_layout.addWidget(self.progress_label)
 
-        
-
         # Delete button
         self.delete_btn = QPushButton("X")
         self.delete_btn.setFixedSize(32, 32)
@@ -277,7 +276,7 @@ class QueueUnit(QWidget):
 
         self.setLayout(main_layout)
         self.setFixedHeight(112)  # Slightly taller to fit preview progress bar
-        self.setMinimumWidth(380) # Ensure content fits horizontally
+        self.setMinimumWidth(380)  # Ensure content fits horizontally
 
     def eventFilter(self, source, event):
         if source is self.thumbnail and event.type() == QEvent.Type.Resize:
@@ -300,11 +299,13 @@ class QueueUnit(QWidget):
         painter.setBrush(QColor("#ffffff"))
 
         if state == "play":
-            points = QPolygonF([
-                QPointF(size * 0.30, size * 0.20),
-                QPointF(size * 0.30, size * 0.80),
-                QPointF(size * 0.80, size * 0.50),
-            ])
+            points = QPolygonF(
+                [
+                    QPointF(size * 0.30, size * 0.20),
+                    QPointF(size * 0.30, size * 0.80),
+                    QPointF(size * 0.80, size * 0.50),
+                ]
+            )
             painter.drawPolygon(points)
         elif state == "pause":
             bar_width = size * 0.22
@@ -332,6 +333,7 @@ class QueueUnit(QWidget):
     def __delete_callback(self):
         try:
             from components.player import preview_player
+
             preview_player.stop()
         except:
             pass
@@ -339,6 +341,7 @@ class QueueUnit(QWidget):
 
     def __play_preview_callback(self):
         from components.player import preview_player
+
         preview_player.toggle(self.id, self.url)
 
     def __on_player_state_changed(self, video_id, state):
@@ -393,6 +396,7 @@ class QueueUnit(QWidget):
             return
         try:
             from components.player import preview_player
+
             pos = preview_player.get_playback_position(self.id)
         except Exception:
             pos = None
@@ -412,6 +416,7 @@ class QueueUnit(QWidget):
             return
         try:
             from components.player import preview_player
+
             pos = preview_player.get_playback_position(self.id)
         except Exception:
             pos = None
@@ -427,6 +432,7 @@ class QueueUnit(QWidget):
         seek_to = float(self.preview_progress.value())
         try:
             from components.player import preview_player
+
             preview_player.seek(self.id, self.url, seek_to)
         except Exception:
             pass
@@ -481,7 +487,9 @@ class QueueUnit(QWidget):
 
         self.progress_label.setFixedSize(85, 20)
 
-        self.progress_label.setStyleSheet(base_style + f"""
+        self.progress_label.setStyleSheet(
+            base_style
+            + f"""
 
             QLabel {{
 
@@ -493,9 +501,8 @@ class QueueUnit(QWidget):
 
             }}
 
-        """)
-
-        
+        """
+        )
 
     def getID(self):
         return self.id
