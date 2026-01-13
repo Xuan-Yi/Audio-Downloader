@@ -5,13 +5,58 @@ from components.styles import Theme
 
 from components.queueUnit import QueueUnit
 
-from pytubefix import YouTube
+from pytubefix import YouTube, extract
+import urllib.request
+import pandas as pd
+
+
+class ThreadSignal(QObject):
+    complete = pyqtSignal(dict)
+
+    def __init__(self):
+        super().__init__()
+
+
+class FetchInfoThread(QRunnable):
+    def __init__(self, url, title=None, artist=None):
+        super().__init__()
+        self.url = url
+        self.title = title
+        self.artist = artist
+        self.signal = ThreadSignal()
+
+    def run(self):
+        try:
+            info_dict = dict()
+            info_dict["Youtube_obj"] = YouTube(self.url)
+            # id
+            info_dict["ID"] = extract.video_id(self.url)
+            # thumbnail data
+            url = info_dict["Youtube_obj"].thumbnail_url
+            info_dict["Thumbnail_data"] = urllib.request.urlopen(url).read()
+            # title text
+            if pd.isnull(self.title) or self.title is None:
+                title = info_dict["Youtube_obj"].title
+                info_dict["Title"] = "".join(x for x in title if x not in '\\/:*?"<>|')
+            else:
+                info_dict["Title"] = self.title
+            # artist text
+            if pd.isnull(self.artist) or self.artist is None:
+                artist = info_dict["Youtube_obj"].author
+                info_dict["Artist"] = "".join(x for x in artist if x not in '\\/:*?"<>|')
+            else:
+                info_dict["Artist"] = self.artist
+            self.signal.complete.emit(info_dict)
+        except Exception as e:
+            print(f"Error fetching info for {self.url}: {e}")
 
 
 class ScrollQueue(QScrollArea):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.units = []
+        self.thread_pool = QThreadPool.globalInstance()
+        # ... rest of init remains same ...
 
         self.setWidgetResizable(True)
         self.setStyleSheet(Theme.get_main_stylesheet())  # Apply global/scroll styles
@@ -30,34 +75,49 @@ class ScrollQueue(QScrollArea):
         self.content_widget.setLayout(self.content_layout)
         self.setWidget(self.content_widget)
 
-    def create_unit(self, url: str):
+    def create_unit(self, url: str, title: str = None, artist: str = None, silent: bool = False):
+        url = url.strip()
+        if not url:
+            return None
+
         exist = False
-        youtube_obj = ""
+        video_id = ""
         try:
-            youtube_obj = YouTube(url)
+            video_id = extract.video_id(url)
             for unit in self.units:
-                if unit.getYoutubeObj() == youtube_obj:
+                if unit.getID() == video_id:
                     exist = True
+                    break
         except Exception as e:
-            QMessageBox.warning(None, "URL warning", f"URL is not valid.\nError message------\n{e}")
+            err_msg = f"URL is not valid.\n{e}"
+            if not silent:
+                print(f"Warning: {err_msg}")
+            return err_msg
 
-        if not exist:
-            if youtube_obj != "":
-                try:
-                    new_unit = QueueUnit(youtube_url=url, funcs=[self.delete_unit_from_list])
-                    self.units.append(new_unit)
-                    self.render_list()
-                    return new_unit
-                except Exception as e:
-                    import traceback
+        if exist:
+            return "This song has existed in queue."
 
-                    err_details = traceback.format_exc()
-                    print(f"CRITICAL ERROR during QueueUnit creation:\n{err_details}")
-                    QMessageBox.critical(None, "Creation Error", f"Failed to create unit.\nError: {e}\n\nCheck console for details.")
-        else:
-            QMessageBox.information(None, "Duplicate source", "This song has existed.")
+        # Start background fetch
+        worker = FetchInfoThread(url, title, artist)
+        worker.signal.complete.connect(self.render_new_unit_from_props)
+        self.thread_pool.start(worker)
+        return None
+
+    def render_new_unit_from_props(self, props: dict):
+        # Double check existence again to handle race conditions
+        for u in self.units:
+            if u.getID() == props["ID"]:
+                return
+
+        new_unit = QueueUnit(funcs=[self.delete_unit_from_list], props=props)
+        self.units.append(new_unit)
+        self.render_list()
 
     def render_new_unit(self, unit: QueueUnit):
+        # Prevent duplicates
+        for u in self.units:
+            if u.getID() == unit.getID():
+                return
         self.units.append(unit)
         self.render_list()
 

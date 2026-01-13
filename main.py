@@ -152,15 +152,13 @@ class MainWindow(QMainWindow):
 
             df = df.dropna(axis="index", subset=["Youtube URL"], how="any")
 
-            self.poolthread = ImportXlsxPoolThread()
             for i in range(len(df)):
                 row = df.iloc[i]
-                work = ImportXlsxThread()
-                work.setRow(row)
-                work.setDeleteUnitMethod(self.central_widget.queueArea.delete_unit_from_list)
-                work.signal.complete.connect(self.__import_xlsx_on_complete)
-                self.poolthread.addThread(work)
-            self.poolthread.start()
+                url = str(row["Youtube URL"]).strip()
+                title = row.get("Title")
+                artist = row.get("Artist")
+                self.central_widget.queueArea.create_unit(url, title, artist, silent=True)
+
         except Exception as e:
             dir = os.path.dirname(filePath)
             sample_path = os.path.join(dir, "Sample.xlsx")
@@ -171,10 +169,6 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Import Error", f"'{os.path.basename(filePath)}' could not be loaded.\n\nA sample file has been created at:\n{sample_path}\n\nError: {e}")
             except Exception as sample_e:
                 QMessageBox.warning(self, "Import Error", f"'{os.path.basename(filePath)}' could not be loaded and a sample file could not be created.\n\nImport Error: {e}\nSample Creation Error: {sample_e}")
-
-    def __import_xlsx_on_complete(self, _props: dict):
-        unit = QueueUnit(funcs=[self.central_widget.queueArea.delete_unit_from_list], props=_props)
-        self.central_widget.queueArea.render_new_unit(unit)
 
     def export_xlsx_callback(self):
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
@@ -317,68 +311,6 @@ class MainWindow(QMainWindow):
         except:
             pass
         event.accept()
-
-
-class ImportXlsxPoolThread(QThread):
-    thread_list = []
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.threadpool = QThreadPool()
-        maxThreadCount = 12  # maximum thread number
-        self.threadpool.setMaxThreadCount(maxThreadCount)
-
-    def addThread(self, _thread):
-        self.thread_list.append(_thread)
-
-    def run(self):
-        for t in self.thread_list:
-            self.threadpool.start(t)
-        self.threadpool.waitForDone()
-        self.thread_list.clear()
-
-
-class ThreadSignal(QObject):
-    complete = pyqtSignal(dict)
-
-    def __init__(self):
-        super().__init__()
-
-
-class ImportXlsxThread(QRunnable):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.signal = ThreadSignal()
-
-    def setRow(self, _row):
-        self.url = _row["Youtube URL"]
-        self.title = _row.get("Title")
-        self.artist = _row.get("Artist")
-
-    def setDeleteUnitMethod(self, _func):
-        self.delete_unit = _func
-
-    def run(self):
-        info_dict = dict()
-        info_dict["Youtube_obj"] = YouTube(self.url)
-        # id
-        info_dict["ID"] = extract.video_id(self.url)
-        # thumbnail data
-        url = info_dict["Youtube_obj"].thumbnail_url
-        info_dict["Thumbnail_data"] = urllib.request.urlopen(url).read()
-        # title text
-        if pd.isnull(self.title):
-            title = info_dict["Youtube_obj"].title
-            info_dict["Title"] = "".join(x for x in title if x not in '\\/:*?"<>|')
-        else:
-            info_dict["Title"] = self.title
-        # artist text
-        if pd.isnull(self.artist):
-            artist = info_dict["Youtube_obj"].author
-            info_dict["Artist"] = "".join(x for x in artist if x not in '\\/:*?"<>|')
-        else:
-            info_dict["Artist"] = self.artist
-        self.signal.complete.emit(info_dict)
 
 
 if __name__ == "__main__":

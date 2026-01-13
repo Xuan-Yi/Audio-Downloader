@@ -41,8 +41,11 @@ class SearchBar(QWidget):
     def on_add_clicked(self):
         url = str(self.searchbar.text()).strip()
         if url:
+            error = self.create_unit(url)
             self.searchbar.setText("")
-            self.create_unit(url)
+            if error:
+                # Show a non-blocking tooltip near the searchbar
+                QToolTip.showText(self.searchbar.mapToGlobal(QPoint(0, self.searchbar.height())), error, self.searchbar)
 
     def setDisabled(self, disable: bool):
         self.searchbar.setDisabled(disable)
